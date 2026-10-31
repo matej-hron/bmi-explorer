@@ -1,0 +1,5 @@
+# Lokální nastavení Claude Code
+.claude/settings.local.json
+
+# Systémové soubory
+.DS_Store

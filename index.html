@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BMI Explorer – kalkulačka a výklad indexu tělesné hmotnosti</title>
+  <meta name="description" content="Spočítejte si BMI, podívejte se, jak výpočet funguje, a zjistěte, co BMI znamená u dospělých a u dětí.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- ============ HLAVIČKA A NAVIGACE ============ -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="logo" href="#top">BMI <span>Explorer</span></a>
+      <nav aria-label="Hlavní navigace">
+        <ul class="main-nav">
+          <li><a href="#kalkulacka">Kalkulačka</a></li>
+          <li><a href="#teorie">Teorie</a></li>
+          <li><a href="#zdroje">Zdroje</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+
+    <!-- ============ ÚVOD ============ -->
+    <section class="hero">
+      <div class="container">
+        <p class="eyebrow">Index tělesné hmotnosti</p>
+        <h1>Co vám řekne BMI – a co ne</h1>
+        <p class="lead">
+          Spočítejte si své BMI, podívejte se, jak výpočet funguje,
+          a zjistěte, proč se u dospělých a u dětí hodnotí jinak.
+        </p>
+      </div>
+    </section>
+
+    <!-- ============ SEKCE A: KALKULAČKA ============ -->
+    <section id="kalkulacka" class="section" aria-labelledby="calculator-title">
+      <div class="container">
+        <h2 id="calculator-title">Kalkulačka BMI</h2>
+
+        <div class="calculator">
+
+          <!-- Formulář. "novalidate" vypne kontrolu prohlížeče – kontrolujeme sami v bmi.js -->
+          <form id="bmi-form" class="card form-card" novalidate>
+
+            <div class="field">
+              <label for="weight">Hmotnost</label>
+              <div class="input-with-unit">
+                <input id="weight" name="weight" type="text" inputmode="decimal"
+                       autocomplete="off" placeholder="např. 70" aria-describedby="weight-error">
+                <span class="unit" aria-hidden="true">kg</span>
+              </div>
+              <p class="field-error" id="weight-error"></p>
+            </div>
+
+            <div class="field">
+              <label for="height">Výška</label>
+              <div class="input-with-unit">
+                <input id="height" name="height" type="text" inputmode="decimal"
+                       autocomplete="off" placeholder="např. 175" aria-describedby="height-error">
+                <span class="unit" aria-hidden="true">cm</span>
+              </div>
+              <p class="field-error" id="height-error"></p>
+            </div>
+
+            <div class="field">
+              <label for="age">Věk</label>
+              <div class="input-with-unit">
+                <input id="age" name="age" type="text" inputmode="numeric"
+                       autocomplete="off" placeholder="např. 13" aria-describedby="age-error">
+                <span class="unit" aria-hidden="true">let</span>
+              </div>
+              <p class="field-error" id="age-error"></p>
+            </div>
+
+            <fieldset class="field" aria-describedby="sex-hint sex-error">
+              <legend>Pohlaví</legend>
+              <div class="radio-group">
+                <label class="radio">
+                  <input type="radio" name="sex" value="male">
+                  <span>Muž / chlapec</span>
+                </label>
+                <label class="radio">
+                  <input type="radio" name="sex" value="female">
+                  <span>Žena / dívka</span>
+                </label>
+              </div>
+              <p class="field-hint" id="sex-hint">
+                U dospělých pohlaví výsledek nemění. U dětí a dospívajících
+                je potřeba ke správnému hodnocení.
+              </p>
+              <p class="field-error" id="sex-error"></p>
+            </fieldset>
+
+            <button type="submit" class="button">Spočítat BMI</button>
+          </form>
+
+          <!-- Výsledek. Na začátku je vidět jen prázdný stav, zbytek doplní script.js -->
+          <div class="card result-card">
+
+            <div id="result-empty" class="result-empty">
+              <p class="result-empty-title">Tady se objeví výsledek</p>
+              <p>Vyplňte hmotnost, výšku, věk a pohlaví a stiskněte <strong>Spočítat BMI</strong>.</p>
+            </div>
+
+            <div id="result" hidden>
+              <h3 id="result-title" class="result-label" tabindex="-1">Vaše BMI</h3>
+              <p class="result-value" id="result-value">–</p>
+
+              <!-- Výpočet krok za krokem -->
+              <div class="calculation">
+                <p class="calculation-title">Jak jsme to spočítali</p>
+                <ol>
+                  <li>Výšku převedeme na metry: <span id="step-height"></span></li>
+                  <li>Výšku umocníme na druhou: <span id="step-square"></span></li>
+                  <li>Hmotnost vydělíme výškou na druhou: <span id="step-divide"></span></li>
+                </ol>
+              </div>
+
+              <!-- Výsledek pro DOSPĚLÉ (18+) -->
+              <div id="adult-result" hidden>
+                <p class="category">Kategorie podle WHO: <strong id="category-name"></strong></p>
+                <p id="category-text"></p>
+
+                <!-- Barevná stupnice. Je jen ozdobná (aria-hidden), stejnou informaci nese text. -->
+                <div class="scale" aria-hidden="true">
+                  <div class="scale-bar">
+                    <span class="scale-segment seg-underweight"></span>
+                    <span class="scale-segment seg-normal"></span>
+                    <span class="scale-segment seg-overweight"></span>
+                    <span class="scale-segment seg-obesity"></span>
+                    <span class="scale-marker" id="scale-marker"></span>
+                  </div>
+                  <div class="scale-ticks">
+                    <span class="tick tick-18">18,5</span>
+                    <span class="tick tick-25">25</span>
+                    <span class="tick tick-30">30</span>
+                  </div>
+                </div>
+
+                <ul class="legend">
+                  <li data-category="underweight"><span class="swatch seg-underweight"></span>Podváha <span class="legend-range">pod 18,5</span></li>
+                  <li data-category="normal"><span class="swatch seg-normal"></span>Normální hmotnost <span class="legend-range">18,5–24,9</span></li>
+                  <li data-category="overweight"><span class="swatch seg-overweight"></span>Nadváha <span class="legend-range">25,0–29,9</span></li>
+                  <li data-category="obesity"><span class="swatch seg-obesity"></span>Obezita <span class="legend-range">30,0 a více</span></li>
+                </ul>
+
+                <p class="note">
+                  BMI je orientační ukazatel, ne diagnóza. Nerozlišuje svaly a tuk,
+                  takže samo o sobě neříká, jestli je člověk zdravý.
+                  <a href="#dospeli">Jak se BMI hodnotí u dospělých</a>
+                </p>
+              </div>
+
+              <!-- Výsledek pro DĚTI A DOSPÍVAJÍCÍ (2–17 let) -->
+              <div id="child-result" hidden>
+                <p class="child-title">Proč tu nevidíte kategorii?</p>
+                <p>
+                  Pro věk <strong id="child-age"></strong> se hranice pro dospělé
+                  nepoužívají. Číslo <strong id="child-bmi"></strong> je proto jen
+                  matematický výsledek výpočtu. Samo o sobě neříká, jestli je hmotnost v pořádku.
+                </p>
+                <p>
+                  Ke zhodnocení je potřeba porovnat BMI s <strong>růstovým grafem
+                  pro <span id="child-sex"></span></strong> stejného věku, kde se určí tzv.
+                  BMI percentil. To dělá lékař, v Česku podle růstových grafů
+                  Státního zdravotního ústavu.
+                </p>
+                <p class="note">
+                  Děti rostou a jejich BMI se s věkem přirozeně mění, proto pro ně
+                  pevné hranice neplatí.
+                  <a href="#deti">Jak se BMI hodnotí u dětí</a>
+                </p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SEKCE B: TEORIE ============ -->
+    <section id="teorie" class="section section-alt" aria-labelledby="theory-title">
+      <div class="container">
+        <h2 id="theory-title">Teorie BMI</h2>
+
+        <nav aria-label="Kapitoly teorie">
+          <ol class="chapters">
+            <li><a href="#co-je-bmi">Co je BMI?</a></li>
+            <li><a href="#vypocet">Jak se počítá?</a></li>
+            <li><a href="#dospeli">Dospělí</a></li>
+            <li><a href="#deti">Děti a dospívající</a></li>
+            <li><a href="#omezeni">Omezení</a></li>
+            <li><a href="#zajimavosti">Zajímavosti</a></li>
+          </ol>
+        </nav>
+
+        <!-- 1. Co je BMI? -->
+        <article id="co-je-bmi" class="card article">
+          <h3><span class="chapter-number">1</span> Co je BMI?</h3>
+          <p>
+            <strong>BMI</strong> je zkratka anglického <em>Body Mass Index</em>, česky
+            <strong>index tělesné hmotnosti</strong>. Je to jedno číslo, které ukazuje,
+            jak velká je hmotnost člověka vzhledem k jeho výšce.
+          </p>
+
+          <div class="two-columns">
+            <div class="box box-yes">
+              <p class="box-title">Co BMI vyjadřuje</p>
+              <ul>
+                <li>poměr mezi hmotností a výškou</li>
+                <li>orientačně, jestli je hmotnost vzhledem k výšce nízká, běžná nebo vysoká</li>
+              </ul>
+            </div>
+            <div class="box box-no">
+              <p class="box-title">Co BMI neměří</p>
+              <ul>
+                <li>kolik máte v těle tuku a kolik svalů a kostí</li>
+                <li>kde je tuk v těle uložený</li>
+                <li>jestli jste zdraví <a class="cite" href="#zdroj-7">[7]</a></li>
+              </ul>
+            </div>
+          </div>
+
+          <h4>Proč se používá?</h4>
+          <p>
+            K výpočtu stačí váha a metr. Je to rychlé, levné a nic to nebolí.
+            Proto se BMI hodí hlavně k <strong>porovnávání velkých skupin lidí</strong>,
+            například když WHO sleduje, jak se mění hmotnost obyvatel celého světa
+            <a class="cite" href="#zdroj-1">[1]</a>. U jednoho člověka slouží
+            jako <strong>screeningový (orientační) ukazatel</strong>: pomůže poznat,
+            kdy má smysl podívat se na věc podrobněji
+            <a class="cite" href="#zdroj-4">[4]</a><a class="cite" href="#zdroj-7">[7]</a>.
+          </p>
+        </article>
+
+        <!-- 2. Jak se BMI počítá? -->
+        <article id="vypocet" class="card article">
+          <h3><span class="chapter-number">2</span> Jak se BMI počítá?</h3>
+
+          <div class="formula" role="img" aria-label="BMI se rovná hmotnost v kilogramech děleno výška v metrech na druhou">
+            <span>BMI =</span>
+            <span class="fraction">
+              <span class="numerator">hmotnost (kg)</span>
+              <span class="denominator">výška (m)²</span>
+            </span>
+          </div>
+
+          <ul class="variables">
+            <li><strong>hmotnost</strong> – v kilogramech (kg)</li>
+            <li><strong>výška</strong> – v <strong>metrech</strong> (m), ne v centimetrech</li>
+            <li><strong>výsledek</strong> – má jednotku kg/m², ale obvykle se píše jen samotné číslo</li>
+          </ul>
+
+          <h4>Příklad: 70 kg a 175 cm</h4>
+          <ol class="steps">
+            <li><span>Výšku převedeme na metry</span> <code>175 cm = 1,75 m</code></li>
+            <li><span>Výšku umocníme na druhou</span> <code>1,75 × 1,75 = 3,0625</code></li>
+            <li><span>Hmotnost vydělíme výškou na druhou</span> <code>70 ÷ 3,0625 = 22,857…</code></li>
+            <li><span>Zaokrouhlíme na jedno desetinné místo</span> <code>BMI ≈ 22,9</code></li>
+          </ol>
+
+          <h4>Proč je výška na druhou?</h4>
+          <p>
+            Vyšší lidé bývají těžší, protože mají delší kosti a víc svalů. Kdybychom
+            hmotnost výškou vůbec nedělili, vysocí lidé by vycházeli „těžší“ jen proto,
+            že jsou vysocí.
+          </p>
+          <p>
+            Belgický vědec <strong>Adolphe Quetelet</strong> v 19. století měřil
+            velké množství lidí. Všiml si, že u dospělých roste hmotnost
+            přibližně s <strong>druhou mocninou výšky</strong>
+            <a class="cite" href="#zdroj-9">[9]</a>. Když tedy hmotnost vydělíme
+            výškou na druhou, dostaneme číslo, které na samotné výšce téměř nezávisí.
+            Díky tomu můžeme porovnávat menší i větší lidi.
+          </p>
+          <div class="tip">
+            <p class="box-title">Proč ne na třetí?</p>
+            <p>
+              Kdyby lidé rostli jako krychle, byl by dvakrát vyšší člověk osmkrát
+              těžší (2 × 2 × 2 = 8), protože by byl i dvakrát širší a dvakrát hlubší.
+              Lidé ale takhle nerostou. Měření ukázala, že u dospělých
+              odpovídá skutečnosti spíš druhá mocnina <a class="cite" href="#zdroj-9">[9]</a>.
+            </p>
+          </div>
+        </article>
+
+        <!-- 3. Dospělí -->
+        <article id="dospeli" class="card article">
+          <h3><span class="chapter-number">3</span> Jak se BMI hodnotí u dospělých?</h3>
+          <p>
+            Pro dospělé používá Světová zdravotnická organizace (WHO) pevné hranice.
+            Platí <strong>stejně pro muže i ženy</strong>
+            <a class="cite" href="#zdroj-1">[1]</a><a class="cite" href="#zdroj-2">[2]</a>.
+          </p>
+
+          <table class="category-table">
+            <caption>Kategorie BMI pro dospělé podle WHO</caption>
+            <thead>
+              <tr><th scope="col">BMI</th><th scope="col">Kategorie</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>pod 18,5</td><td><span class="swatch seg-underweight"></span>Podváha</td></tr>
+              <tr><td>18,5–24,9</td><td><span class="swatch seg-normal"></span>Normální hmotnost</td></tr>
+              <tr><td>25,0–29,9</td><td><span class="swatch seg-overweight"></span>Nadváha</td></tr>
+              <tr><td>30,0 a více</td><td><span class="swatch seg-obesity"></span>Obezita</td></tr>
+            </tbody>
+          </table>
+          <p class="small">
+            Obezitu WHO ještě dělí na tři stupně: I. (30,0–34,9), II. (35,0–39,9)
+            a III. (40 a více) <a class="cite" href="#zdroj-2">[2]</a><a class="cite" href="#zdroj-4">[4]</a>.
+          </p>
+
+          <h4>Orientační ukazatel, ne diagnóza</h4>
+          <p>
+            BMI je <strong>screeningový</strong> ukazatel. Slouží k rychlému
+            orientačnímu zjištění, ne ke stanovení nemoci
+            <a class="cite" href="#zdroj-4">[4]</a>. Při hodnocení zdraví se proto
+            berou v úvahu i další údaje, například obvod pasu
+            <a class="cite" href="#zdroj-1">[1]</a>.
+          </p>
+
+          <h4>Největší háček: svaly</h4>
+          <p>
+            BMI nerozlišuje tuk, svaly a kosti <a class="cite" href="#zdroj-7">[7]</a>.
+            Sportovec s velkými svaly tak může mít BMI v pásmu nadváhy, i když má tuku
+            málo. A naopak, člověk s malým množstvím svalů může mít „normální“ BMI
+            a přitom poměrně hodně tuku <a class="cite" href="#zdroj-12">[12]</a>.
+          </p>
+        </article>
+
+        <!-- 4. Děti a dospívající -->
+        <article id="deti" class="card article">
+          <h3><span class="chapter-number">4</span> Jak se BMI hodnotí u dětí a dospívajících?</h3>
+
+          <h4>Proč nestačí hranice pro dospělé?</h4>
+          <p>
+            Děti a dospívající rostou. S věkem se mění výška, hmotnost i množství tuku
+            v těle a vývoj chlapců a dívek se liší. Stejné BMI proto může u osmiletého
+            dítěte znamenat něco jiného než u patnáctiletého. Proto se BMI dětí vždy
+            porovnává s dětmi <strong>stejného věku a pohlaví</strong>
+            <a class="cite" href="#zdroj-5">[5]</a><a class="cite" href="#zdroj-6">[6]</a>.
+          </p>
+
+          <h4>BMI se během dětství přirozeně mění</h4>
+          <p>
+            V prvním roce života BMI stoupá, potom klesá a zhruba kolem 6 let začne
+            znovu stoupat. Tomuto opětovnému nárůstu se odborně říká
+            <em>adiposity rebound</em> <a class="cite" href="#zdroj-13">[13]</a>.
+            Kdybychom u dětí použili pevné hranice, výsledek by často neodpovídal.
+          </p>
+
+          <h4>Co je percentil?</h4>
+          <p>
+            Představte si 100 dětí stejného věku a pohlaví seřazených podle BMI
+            od nejnižšího po nejvyšší. <strong>Percentil</strong> říká, kde v této řadě
+            dítě stojí. Dítě na 75. percentilu má vyšší BMI než asi 75 ze 100
+            vrstevníků <a class="cite" href="#zdroj-6">[6]</a>.
+          </p>
+
+          <h4>Růstové grafy</h4>
+          <p>
+            Percentily se zjišťují měřením velkého množství dětí a kreslí se do
+            <strong>růstových grafů</strong>, zvlášť pro chlapce a zvlášť pro dívky.
+            Na vodorovné ose je věk, na svislé BMI a každá křivka patří jednomu
+            percentilu. Lékař do grafu zakreslí bod podle věku a BMI dítěte
+            a podívá se, mezi kterými křivkami leží.
+          </p>
+
+          <!-- Schematický obrázek růstového grafu – BEZ skutečných hodnot -->
+          <figure class="figure">
+            <svg viewBox="0 0 360 210" role="img" aria-labelledby="chart-title chart-desc">
+              <title id="chart-title">Schéma růstového grafu BMI</title>
+              <desc id="chart-desc">Čtyři křivky percentilů. Od 2 let mírně klesají, nejníž jsou kolem 6 let a potom až do 18 let stoupají a rozcházejí se od sebe. Graf nemá skutečné hodnoty.</desc>
+              <!-- osy -->
+              <line class="axis" x1="40" y1="175" x2="300" y2="175"/>
+              <line class="axis" x1="40" y1="175" x2="40" y2="15"/>
+              <text class="axis-label" x="16" y="95" transform="rotate(-90 16 95)">BMI</text>
+              <text class="axis-label" x="170" y="205" text-anchor="middle">věk (roky)</text>
+              <!-- popisky věku -->
+              <text class="tick-label" x="40" y="190" text-anchor="middle">2</text>
+              <text class="tick-label" x="102" y="190" text-anchor="middle">6</text>
+              <text class="tick-label" x="165" y="190" text-anchor="middle">10</text>
+              <text class="tick-label" x="227" y="190" text-anchor="middle">14</text>
+              <text class="tick-label" x="290" y="190" text-anchor="middle">18</text>
+              <!-- kolem 6 let je BMI nejnižší -->
+              <line class="guide" x1="102" y1="175" x2="102" y2="40"/>
+              <text class="guide-label" x="107" y="36">nejnižší kolem 6 let</text>
+              <!-- křivky percentilů (jen tvar, ne skutečná data) -->
+              <path class="curve" d="M40,100 C62,106 84,108 102,107 C160,104 235,55 290,32"/>
+              <path class="curve" d="M40,108 C62,114 84,117 102,116 C160,114 235,72 290,52"/>
+              <path class="curve curve-main" d="M40,120 C62,127 84,131 102,131 C160,131 235,97 290,76"/>
+              <path class="curve" d="M40,138 C62,144 84,147 102,147 C160,147 235,124 290,108"/>
+              <text class="curve-label" x="296" y="35">95.</text>
+              <text class="curve-label" x="296" y="56">85.</text>
+              <text class="curve-label curve-label-main" x="296" y="80">50.</text>
+              <text class="curve-label" x="296" y="112">5. percentil</text>
+            </svg>
+            <figcaption>
+              Schematický obrázek. Ukazuje jen tvar křivek, nejsou na něm
+              skutečné hodnoty. Skutečné grafy vydávají WHO, CDC a v Česku
+              Státní zdravotní ústav.
+            </figcaption>
+          </figure>
+
+          <h4>Kdo grafy vydává?</h4>
+          <ul>
+            <li>
+              <strong>WHO</strong> má referenční data pro děti a dospívající od 5 do 19 let
+              <a class="cite" href="#zdroj-3">[3]</a>. Hodnotí je pomocí směrodatné
+              odchylky od průměru <a class="cite" href="#zdroj-1">[1]</a>.
+            </li>
+            <li>
+              Americké <strong>CDC</strong> používá grafy pro věk 2–19 let a podle percentilu
+              určuje kategorii, například 85. percentil a víc znamená nadváhu
+              a 95. percentil a víc obezitu <a class="cite" href="#zdroj-6">[6]</a>.
+            </li>
+            <li>
+              V <strong>Česku</strong> lékaři používají české růstové grafy, které vydává
+              Státní zdravotní ústav. Najdete je i ve zdravotním a očkovacím
+              průkazu dítěte <a class="cite" href="#zdroj-8">[8]</a>.
+            </li>
+          </ul>
+          <p>
+            Různé grafy mohou dát trochu jiný výsledek. Proto naše kalkulačka u dětí
+            žádnou kategorii neukazuje. Správné zhodnocení patří lékaři s vhodným
+            růstovým grafem.
+          </p>
+          <p class="small">
+            <strong>Proč hranice 18 let?</strong> Tato aplikace používá hranice pro
+            dospělé od 18 let, protože WHO uvádí údaje o dospělých od 18 let
+            <a class="cite" href="#zdroj-1">[1]</a>. Organizace se tu ale úplně
+            neshodnou: dětská data WHO sahají do 19 let <a class="cite" href="#zdroj-3">[3]</a>
+            a CDC používá kalkulačku pro dospělé až od 20 let <a class="cite" href="#zdroj-4">[4]</a>.
+          </p>
+        </article>
+
+        <!-- 5. Omezení -->
+        <article id="omezeni" class="card article">
+          <h3><span class="chapter-number">5</span> Jaká jsou omezení BMI?</h3>
+          <ul class="limits">
+            <li>
+              <p class="limit-title">Nerozliší svaly od tuku</p>
+              <p>Do výpočtu vstupuje celá hmotnost těla: tuk, svaly i kosti dohromady <a class="cite" href="#zdroj-7">[7]</a>.</p>
+            </li>
+            <li>
+              <p class="limit-title">Neměří tuk přímo</p>
+              <p>
+                BMI se počítá jen z hmotnosti a výšky. S množstvím tuku souvisí, ale
+                ne přesně <a class="cite" href="#zdroj-7">[7]</a><a class="cite" href="#zdroj-11">[11]</a>.
+                Velká studie zjistila, že hranice BMI 30 neodhalila víc než polovinu lidí,
+                kteří měli podle přesného měření nadbytek tuku <a class="cite" href="#zdroj-12">[12]</a>.
+              </p>
+            </li>
+            <li>
+              <p class="limit-title">Neukáže, kde je tuk uložený</p>
+              <p>
+                Pro zdraví záleží i na tom, kde v těle tuk je <a class="cite" href="#zdroj-11">[11]</a>.
+                BMI to nepozná <a class="cite" href="#zdroj-7">[7]</a>, proto se někdy
+                měří také obvod pasu <a class="cite" href="#zdroj-1">[1]</a>.
+              </p>
+            </li>
+            <li>
+              <p class="limit-title">Stejné číslo neznamená u všech totéž</p>
+              <p>
+                U lidí různého pohlaví, věku nebo původu může stejné BMI znamenat různé
+                množství tuku a různá rizika <a class="cite" href="#zdroj-12">[12]</a>.
+                Například u řady obyvatel Asie rostou zdravotní rizika už při BMI nižším
+                než 25 <a class="cite" href="#zdroj-14">[14]</a>.
+              </p>
+            </li>
+            <li>
+              <p class="limit-title">Není to úplné posouzení zdraví</p>
+              <p>
+                BMI je jen jeden z ukazatelů. Kdo chce vědět víc o svém zdraví, měl by se
+                poradit s lékařem, který může udělat další měření
+                <a class="cite" href="#zdroj-4">[4]</a><a class="cite" href="#zdroj-7">[7]</a>.
+              </p>
+            </li>
+          </ul>
+        </article>
+
+        <!-- 6. Zajímavosti -->
+        <article id="zajimavosti" class="card article">
+          <h3><span class="chapter-number">6</span> Zajímavosti</h3>
+          <div class="facts">
+            <div class="fact">
+              <p class="fact-number">1832</p>
+              <p>
+                Belgický matematik, astronom a statistik <strong>Adolphe Quetelet</strong>
+                (1796–1874) popsal tento index v roce 1832. Nezajímal ho jeden člověk,
+                ale „průměrný člověk“, tedy statistika celých skupin lidí
+                <a class="cite" href="#zdroj-9">[9]</a>.
+              </p>
+            </div>
+            <div class="fact">
+              <p class="fact-number">1972</p>
+              <p>
+                Dlouho se mu říkalo Queteletův index. Název <em>body mass index</em>
+                mu dal až americký vědec Ancel Keys v roce 1972
+                <a class="cite" href="#zdroj-9">[9]</a><a class="cite" href="#zdroj-10">[10]</a>.
+              </p>
+            </div>
+            <div class="fact">
+              <p class="fact-number">45&nbsp;%</p>
+              <p>
+                BMI se hodně používá v <strong>epidemiologii</strong>, oboru, který zkoumá
+                zdraví celých skupin obyvatel. Podle WHO mělo v roce 2024 nadváhu
+                (BMI 25 a více) 45 % dospělých na světě, tedy asi 2,6 miliardy lidí
+                <a class="cite" href="#zdroj-1">[1]</a>.
+              </p>
+            </div>
+            <div class="fact">
+              <p class="fact-number">2 čísla</p>
+              <p>
+                BMI je jednoduchý matematický ukazatel ze dvou čísel. Zdraví přímo
+                neměří: je to jen poměr hmotnosti a výšky.
+              </p>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ============ ZDROJE ============ -->
+    <section id="zdroje" class="section" aria-labelledby="sources-title">
+      <div class="container">
+        <h2 id="sources-title">Zdroje</h2>
+        <p class="small">Odkazy byly zkontrolovány 31. 10. 2026. Čísla v hranatých závorkách v textu odkazují na tento seznam.</p>
+
+        <h3 class="sources-group">Zdravotnické organizace</h3>
+        <ol class="sources">
+          <li id="zdroj-1">
+            World Health Organization: <a href="https://www.who.int/news-room/fact-sheets/detail/obesity-and-overweight" target="_blank" rel="noopener">Obesity and overweight</a> (informační list).
+            <span class="source-note">Hranice BMI 25 a 30 pro dospělé, hodnocení dětí 5–19 let, světová čísla za rok 2024, obvod pasu.</span>
+          </li>
+          <li id="zdroj-2">
+            World Health Organization: <a href="https://pubmed.ncbi.nlm.nih.gov/11234459/" target="_blank" rel="noopener">Obesity: preventing and managing the global epidemic</a>. WHO Technical Report Series 894, 2000.
+            <span class="source-note">Mezinárodní klasifikace BMI pro dospělé včetně stupňů obezity.</span>
+          </li>
+          <li id="zdroj-3">
+            World Health Organization: <a href="https://www.who.int/tools/growth-reference-data-for-5to19-years" target="_blank" rel="noopener">Growth reference data for 5–19 years</a>
+            (a stránka <a href="https://www.who.int/tools/growth-reference-data-for-5to19-years/indicators/bmi-for-age" target="_blank" rel="noopener">BMI-for-age</a>).
+            <span class="source-note">Referenční data a grafy BMI podle věku, zvlášť pro chlapce a dívky.</span>
+          </li>
+          <li id="zdroj-4">
+            CDC: <a href="https://www.cdc.gov/bmi/adult-calculator/" target="_blank" rel="noopener">Adult BMI Calculator</a>.
+            <span class="source-note">Kategorie pro dospělé (20+), BMI jako screening, ne diagnóza.</span>
+          </li>
+          <li id="zdroj-5">
+            CDC: <a href="https://www.cdc.gov/bmi/child-teen-calculator/" target="_blank" rel="noopener">Child and Teen BMI Calculator</a>.
+            <span class="source-note">U dětí 2–19 let se BMI hodnotí percentily podle věku a pohlaví.</span>
+          </li>
+          <li id="zdroj-6">
+            CDC: <a href="https://www.cdc.gov/bmi/child-teen-calculator/bmi-categories.html" target="_blank" rel="noopener">Child and Teen BMI Categories</a>.
+            <span class="source-note">Co je percentil a hranice kategorií podle percentilů.</span>
+          </li>
+          <li id="zdroj-7">
+            CDC: <a href="https://www.cdc.gov/bmi/about/index.html" target="_blank" rel="noopener">Body Mass Index (BMI)</a>.
+            <span class="source-note">BMI neměří tuk přímo, nerozlišuje tuk, svaly a kosti a neukazuje rozložení tuku.</span>
+          </li>
+          <li id="zdroj-8">
+            Státní zdravotní ústav: <a href="https://szu.gov.cz/publikace-szu/data/hodnoceni-rustu-a-vyvoje/rustove-grafy-ke-stazeni/" target="_blank" rel="noopener">Růstové grafy ke stažení</a>.
+            <span class="source-note">České růstové grafy včetně BMI pro chlapce a dívky.</span>
+          </li>
+        </ol>
+
+        <h3 class="sources-group">Odborné články (PubMed / NCBI)</h3>
+        <ol class="sources" start="9">
+          <li id="zdroj-9">
+            Eknoyan G. <a href="https://pubmed.ncbi.nlm.nih.gov/17890752/" target="_blank" rel="noopener">Adolphe Quetelet (1796–1874) – the average man and indices of obesity</a>.
+            Nephrology Dialysis Transplantation. 2008;23(1):47–51.
+            <span class="source-note">Historie indexu, hmotnost roste s druhou mocninou výšky, pojmenování BMI.</span>
+          </li>
+          <li id="zdroj-10">
+            Keys A, Fidanza F, Karvonen MJ, Kimura N, Taylor HL. <a href="https://pubmed.ncbi.nlm.nih.gov/4650929/" target="_blank" rel="noopener">Indices of relative weight and obesity</a>.
+            Journal of Chronic Diseases. 1972;25(6):329–343.
+            <span class="source-note">Článek, ve kterém vznikl název body mass index.</span>
+          </li>
+          <li id="zdroj-11">
+            Nuttall FQ. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4890841/" target="_blank" rel="noopener">Body Mass Index: Obesity, BMI, and Health: A Critical Review</a>.
+            Nutrition Today. 2015;50(3):117–128.
+            <span class="source-note">Kritický přehled omezení BMI.</span>
+          </li>
+          <li id="zdroj-12">
+            Romero-Corral A a kol. <a href="https://pubmed.ncbi.nlm.nih.gov/18283284/" target="_blank" rel="noopener">Accuracy of body mass index in diagnosing obesity in the adult general population</a>.
+            International Journal of Obesity. 2008;32(6):959–966.
+            <span class="source-note">BMI 30 nezachytí víc než polovinu lidí s nadbytkem tuku; přesnost se liší podle pohlaví a věku.</span>
+          </li>
+          <li id="zdroj-13">
+            Rolland-Cachera MF a kol. <a href="https://pubmed.ncbi.nlm.nih.gov/6691287/" target="_blank" rel="noopener">Adiposity rebound in children: a simple indicator for predicting obesity</a>.
+            American Journal of Clinical Nutrition. 1984;39(1):129–135.
+            <span class="source-note">Jak se BMI mění během dětství.</span>
+          </li>
+          <li id="zdroj-14">
+            WHO Expert Consultation. <a href="https://pubmed.ncbi.nlm.nih.gov/14726171/" target="_blank" rel="noopener">Appropriate body-mass index for Asian populations and its implications for policy and intervention strategies</a>.
+            The Lancet. 2004;363(9403):157–163.
+            <span class="source-note">U části asijské populace rostou rizika už při BMI pod 25.</span>
+          </li>
+        </ol>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p><strong>BMI Explorer</strong> · ročníkový projekt · Vojta, Scio škola · 2026</p>
+      <p class="small">Aplikace slouží ke vzdělávání a nenahrazuje radu lékaře.</p>
+    </div>
+  </footer>
+
+  <!-- Nejdřív výpočty, potom práce se stránkou -->
+  <script src="bmi.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
