@@ -17,7 +17,8 @@ const code = fs.readFileSync(path.join(__dirname, "..", "bmi.js"), "utf8");
 const bmi = vm.runInNewContext(
   code +
     "\n({ parseNumber, calculateBmi, roundToOneDecimal, isAdult," +
-    " getAdultCategory, interpretBmi, getScalePosition, validateInputs })"
+    " getAdultCategory, interpretBmi, getScalePosition, validateInputs," +
+    " normalCdf, getChildLms, getBmiPercentile, getChildCategory, getChildRanges })"
 );
 
 // Pomocná funkce: kategorie pro dospělého podle hmotnosti a výšky
@@ -78,16 +79,102 @@ test("hranice dospělosti je 18 let", () => {
 });
 
 test("pod 18 let se nikdy nepoužijí kategorie pro dospělé", () => {
+  const childIds = ["child-underweight", "child-normal", "child-overweight", "child-obesity"];
   for (let age = 2; age < 18; age++) {
-    for (const value of [14, 18.5, 22, 25, 30, 40]) {
-      const result = bmi.interpretBmi(value, age);
-      assert.equal(result.group, "child");
-      assert.equal(result.category, null);
+    for (const sex of ["male", "female"]) {
+      for (const value of [14, 18.5, 22, 25, 30, 40]) {
+        const result = bmi.interpretBmi(value, age, sex);
+        assert.equal(result.group, "child");
+        assert.ok(childIds.includes(result.category.id), `věk ${age}, BMI ${value}`);
+        assert.ok(result.percentile >= 0 && result.percentile <= 99);
+      }
     }
   }
-  const adult = bmi.interpretBmi(22.9, 18);
+  const adult = bmi.interpretBmi(22.9, 18, "male");
   assert.equal(adult.group, "adult");
   assert.equal(adult.category.id, "normal");
+});
+
+test("normální rozdělení – známé hodnoty", () => {
+  assert.ok(Math.abs(bmi.normalCdf(0) - 0.5) < 1e-6);
+  assert.ok(Math.abs(bmi.normalCdf(1.6448536) - 0.95) < 1e-6);
+  assert.ok(Math.abs(bmi.normalCdf(1.0364334) - 0.85) < 1e-6);
+  assert.ok(Math.abs(bmi.normalCdf(-1.6448536) - 0.05) < 1e-6);
+});
+
+test("tabulka CDC – pro každý věk 2–17 a obě pohlaví", () => {
+  for (let age = 2; age <= 17; age++) {
+    for (const sex of ["male", "female"]) {
+      const lms = bmi.getChildLms(age, sex);
+      assert.ok(lms.M > 14 && lms.M < 23, `medián pro věk ${age}`);
+    }
+  }
+});
+
+test("percentil odpovídá hodnotám z tabulky CDC", () => {
+  // Hodnoty P5, P50, P85 a P95 přímo ze souboru CDC bmiagerev.csv
+  // (průměr řádků pro střed daného roku, např. 13 let → 162 měsíců).
+  const cases = [
+    [16.2728, 2, "male", 50],
+    [15.6976, 13, "male", 5],
+    [18.7835, 13, "male", 50],
+    [22.2258, 13, "male", 85],
+    [25.5862, 13, "male", 95],
+    [18.6743, 8, "female", 85],
+    [21.2005, 8, "female", 95],
+  ];
+  for (const [value, age, sex, expected] of cases) {
+    const p = bmi.getBmiPercentile(value, age, sex);
+    assert.ok(Math.abs(p - expected) < 0.2, `${sex} ${age} let, BMI ${value}: ${p}`);
+  }
+});
+
+test("kategorie dětí – hranice percentilů CDC", () => {
+  const cases = [
+    [0, "child-underweight"],
+    [4, "child-underweight"],
+    [5, "child-normal"],
+    [84, "child-normal"],
+    [85, "child-overweight"],
+    [94, "child-overweight"],
+    [95, "child-obesity"],
+    [99, "child-obesity"],
+  ];
+  for (const [percentile, expected] of cases) {
+    assert.equal(bmi.getChildCategory(percentile).id, expected, `${percentile}. percentil`);
+  }
+});
+
+test("dítě – příklad: chlapec 13 let, 45 kg, 155 cm", () => {
+  const rounded = bmi.roundToOneDecimal(bmi.calculateBmi(45, 155)); // 18,7
+  const result = bmi.interpretBmi(rounded, 13, "male");
+  assert.equal(result.percentile, 48); // těsně pod mediánem 18,78
+  assert.equal(result.category.id, "child-normal");
+});
+
+test("stejné BMI znamená v jiném věku a u jiného pohlaví něco jiného", () => {
+  // BMI 19 je u 4letého chlapce obezita, u 15letého normální hmotnost
+  assert.equal(bmi.interpretBmi(19, 4, "male").category.id, "child-obesity");
+  assert.equal(bmi.interpretBmi(19, 15, "male").category.id, "child-normal");
+  // u 8letých dětí: BMI 21 → chlapec obezita, dívka nadváha
+  assert.equal(bmi.interpretBmi(21, 8, "male").category.id, "child-obesity");
+  assert.equal(bmi.interpretBmi(21, 8, "female").category.id, "child-overweight");
+});
+
+test("rozmezí BMI v legendě přesně odpovídají kategoriím", () => {
+  for (let age = 2; age <= 17; age++) {
+    for (const sex of ["male", "female"]) {
+      const ranges = bmi.getChildRanges(age, sex);
+      assert.equal(ranges.length, 4);
+      // projdeme všechna BMI 10,0–45,0 po desetinách
+      for (let tenths = 100; tenths <= 450; tenths++) {
+        const value = tenths / 10;
+        const fromPercentile = bmi.interpretBmi(value, age, sex).category.id;
+        const fromRanges = ranges.find((r) => value >= r.from && value < r.upTo).id;
+        assert.equal(fromRanges, fromPercentile, `${sex} ${age} let, BMI ${value}`);
+      }
+    }
+  }
 });
 
 test("převod textu na číslo (desetinná čárka i tečka)", () => {

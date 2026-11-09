@@ -25,6 +25,18 @@ const CATEGORY_TEXTS = {
     "BMI je 30,0 nebo více, což WHO u dospělých označuje jako obezitu.",
 };
 
+// Krátké vysvětlení ke každé kategorii pro děti (podle percentilu CDC).
+const CHILD_CATEGORY_TEXTS = {
+  "child-underweight":
+    "BMI je pod 5. percentilem, což CDC u dětí a dospívajících označuje jako podváhu.",
+  "child-normal":
+    "BMI je mezi 5. a 85. percentilem, což CDC u dětí a dospívajících označuje jako normální hmotnost.",
+  "child-overweight":
+    "BMI je mezi 85. a 95. percentilem, což CDC u dětí a dospívajících označuje jako nadváhu.",
+  "child-obesity":
+    "BMI je na 95. percentilu nebo výš, což CDC u dětí a dospívajících označuje jako obezitu.",
+};
+
 /**
  * Zapíše číslo česky: s desetinnou čárkou (22,9 místo 22.9).
  * maxDecimals = kolik nejvýš desetinných míst ukázat.
@@ -113,7 +125,7 @@ function showAdultResult(bmi, category) {
   marker.dataset.category = category.id;
 
   // Zvýrazníme řádek legendy s kategorií uživatele
-  for (const item of document.querySelectorAll(".legend li")) {
+  for (const item of document.querySelectorAll("#adult-legend li")) {
     item.classList.toggle("is-active", item.dataset.category === category.id);
   }
 
@@ -122,12 +134,47 @@ function showAdultResult(bmi, category) {
 }
 
 /**
- * Zobrazí výsledek pro dítě nebo dospívajícího – BEZ kategorií pro dospělé.
+ * Zapíše rozmezí BMI pro legendu, např. "15,7–22,2" nebo "pod 15,7".
+ * "upTo" je první hodnota, která už do kategorie nepatří,
+ * proto horní hranici ukážeme o desetinu nižší.
  */
-function showChildResult(bmi, age, sex) {
-  document.getElementById("child-age").textContent = formatYears(age);
-  document.getElementById("child-bmi").textContent = formatBmi(bmi);
-  document.getElementById("child-sex").textContent = sex === "male" ? "chlapce" : "dívky";
+function formatRange(range) {
+  if (range.from === 0) return "pod " + formatBmi(range.upTo);
+  if (range.upTo === Infinity) return formatBmi(range.from) + " a více";
+  return formatBmi(range.from) + "–" + formatBmi(range.upTo - 0.1);
+}
+
+/**
+ * Zobrazí výsledek pro dítě nebo dospívajícího: percentil a kategorii podle CDC.
+ * Hranice pro dospělé se tu nepoužijí.
+ */
+function showChildResult(interpretation, age, sex) {
+  const { percentile, category, ranges } = interpretation;
+  const children = sex === "male" ? "chlapců" : "dívek";
+
+  document.getElementById("child-percentile").textContent =
+    percentile < 1 ? "pod 1." : percentile + ".";
+  document.getElementById("child-percentile-text").textContent =
+    percentile < 1
+      ? `Ze 100 ${children} stejného věku (${formatYears(age)}) má nižší BMI méně než 1.`
+      : `Ze 100 ${children} stejného věku (${formatYears(age)}) má nižší BMI asi ${percentile}.`;
+
+  document.getElementById("child-category-name").textContent = category.name;
+  document.getElementById("child-category-text").textContent = CHILD_CATEGORY_TEXTS[category.id];
+  document.getElementById("child-age-used").textContent = formatNumber(age + 0.5, 1) + " roku";
+
+  // Značka na stupnici percentilů (0–100 %)
+  const marker = document.getElementById("child-scale-marker");
+  marker.style.left = percentile + "%";
+
+  // Legenda: rozmezí BMI pro tento věk a pohlaví + zvýraznění kategorie
+  document.getElementById("child-legend-group").textContent =
+    `${sex === "male" ? "chlapce" : "dívky"} ve věku ${formatYears(age)}`;
+  for (const item of document.querySelectorAll("#child-legend li")) {
+    const range = ranges.find((r) => r.id === item.dataset.category);
+    item.querySelector(".legend-range").textContent = formatRange(range);
+    item.classList.toggle("is-active", item.dataset.category === category.id);
+  }
 
   childResult.hidden = false;
   adultResult.hidden = true;
@@ -167,11 +214,11 @@ function handleSubmit(event) {
   document.getElementById("result-value").textContent = formatBmi(bmi);
   showCalculation(values.weight, values.height, bmi);
 
-  const interpretation = interpretBmi(bmi, values.age);
+  const interpretation = interpretBmi(bmi, values.age, values.sex);
   if (interpretation.group === "adult") {
     showAdultResult(bmi, interpretation.category);
   } else {
-    showChildResult(bmi, values.age, values.sex);
+    showChildResult(interpretation, values.age, values.sex);
   }
 
   resultEmpty.hidden = true;

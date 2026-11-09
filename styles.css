@@ -446,6 +446,13 @@ code {
 .scale-bar .seg-overweight { flex: 5; }
 .scale-bar .seg-obesity { flex: 5; }
 
+/* Stupnice percentilů pro děti 0–100: podváha 0–5, normální 5–85,
+   nadváha 85–95, obezita 95–100 */
+.scale-bar.child-scale .seg-underweight { flex: 5; }
+.scale-bar.child-scale .seg-normal { flex: 80; }
+.scale-bar.child-scale .seg-overweight { flex: 10; }
+.scale-bar.child-scale .seg-obesity { flex: 5; }
+
 .seg-underweight { background: var(--c-underweight); }
 .seg-normal { background: var(--c-normal); }
 .seg-overweight { background: var(--c-overweight); }
@@ -480,6 +487,16 @@ code {
 .tick-18 { left: 17.5%; } /* (18,5 − 15) / 20 */
 .tick-25 { left: 50%; }   /* (25 − 15) / 20 */
 .tick-30 { left: 75%; }   /* (30 − 15) / 20 */
+
+.tick-p5 { left: 5%; }
+.tick-p85 { left: 85%; }
+.tick-p95 { left: 95%; }
+
+.legend-title {
+  margin: 16px 0 0;
+  font-size: 0.93rem;
+  color: var(--muted);
+}
 
 .legend {
   list-style: none;

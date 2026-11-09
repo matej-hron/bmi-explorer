@@ -142,7 +142,7 @@
                   </div>
                 </div>
 
-                <ul class="legend">
+                <ul class="legend" id="adult-legend">
                   <li data-category="underweight"><span class="swatch seg-underweight"></span>Podváha <span class="legend-range">pod 18,5</span></li>
                   <li data-category="normal"><span class="swatch seg-normal"></span>Normální hmotnost <span class="legend-range">18,5–24,9</span></li>
                   <li data-category="overweight"><span class="swatch seg-overweight"></span>Nadváha <span class="legend-range">25,0–29,9</span></li>
@@ -156,23 +156,44 @@
                 </p>
               </div>
 
-              <!-- Výsledek pro DĚTI A DOSPÍVAJÍCÍ (2–17 let) -->
+              <!-- Výsledek pro DĚTI A DOSPÍVAJÍCÍ (2–17 let): percentil a kategorie podle CDC -->
               <div id="child-result" hidden>
-                <p class="child-title">Proč tu nevidíte kategorii?</p>
-                <p>
-                  Pro věk <strong id="child-age"></strong> se hranice pro dospělé
-                  nepoužívají. Číslo <strong id="child-bmi"></strong> je proto jen
-                  matematický výsledek výpočtu. Samo o sobě neříká, jestli je hmotnost v pořádku.
-                </p>
-                <p>
-                  Ke zhodnocení je potřeba porovnat BMI s <strong>růstovým grafem
-                  pro <span id="child-sex"></span></strong> stejného věku, kde se určí tzv.
-                  BMI percentil. To dělá lékař, v Česku podle růstových grafů
-                  Státního zdravotního ústavu.
-                </p>
+                <p class="category">Percentil BMI: <strong id="child-percentile"></strong></p>
+                <p id="child-percentile-text"></p>
+                <p class="category">Kategorie podle CDC: <strong id="child-category-name"></strong></p>
+                <p id="child-category-text"></p>
+
+                <!-- Stupnice percentilů 0–100. Je jen ozdobná (aria-hidden), stejnou informaci nese text. -->
+                <div class="scale" aria-hidden="true">
+                  <div class="scale-bar child-scale">
+                    <span class="scale-segment seg-underweight"></span>
+                    <span class="scale-segment seg-normal"></span>
+                    <span class="scale-segment seg-overweight"></span>
+                    <span class="scale-segment seg-obesity"></span>
+                    <span class="scale-marker" id="child-scale-marker"></span>
+                  </div>
+                  <div class="scale-ticks">
+                    <span class="tick tick-p5">5.</span>
+                    <span class="tick tick-p85">85.</span>
+                    <span class="tick tick-p95">95.</span>
+                  </div>
+                </div>
+
+                <p class="legend-title">BMI pro <span id="child-legend-group"></span>:</p>
+                <ul class="legend" id="child-legend">
+                  <li data-category="child-underweight"><span class="swatch seg-underweight"></span>Podváha <span class="legend-range"></span></li>
+                  <li data-category="child-normal"><span class="swatch seg-normal"></span>Normální hmotnost <span class="legend-range"></span></li>
+                  <li data-category="child-overweight"><span class="swatch seg-overweight"></span>Nadváha <span class="legend-range"></span></li>
+                  <li data-category="child-obesity"><span class="swatch seg-obesity"></span>Obezita <span class="legend-range"></span></li>
+                </ul>
+
                 <p class="note">
-                  Děti rostou a jejich BMI se s věkem přirozeně mění, proto pro ně
-                  pevné hranice neplatí.
+                  Věk zadáváte v celých letech, proto počítáme se středem roku
+                  (<span id="child-age-used"></span>). Používáme americká data CDC.
+                  Čeští lékaři hodnotí podle růstových grafů Státního zdravotního ústavu,
+                  které mají trochu jiná data i hranice, takže výsledek se může mírně lišit.
+                  BMI je orientační ukazatel, ne diagnóza – jestli dítě roste v pořádku,
+                  posoudí nejlépe dětský lékař.
                   <a href="#deti">Jak se BMI hodnotí u dětí</a>
                 </p>
               </div>
@@ -426,9 +447,34 @@
             </li>
           </ul>
           <p>
-            Různé grafy mohou dát trochu jiný výsledek. Proto naše kalkulačka u dětí
-            žádnou kategorii neukazuje. Správné zhodnocení patří lékaři s vhodným
-            růstovým grafem.
+            Naše kalkulačka u dětí počítá percentil podle dat <strong>CDC</strong>,
+            protože pokrývají celý věk 2–19 let v jedné tabulce a mají jasné hranice
+            kategorií <a class="cite" href="#zdroj-6">[6]</a>. Různé grafy ale mohou dát
+            trochu jiný výsledek. Správné zhodnocení proto patří lékaři s českým
+            růstovým grafem <a class="cite" href="#zdroj-8">[8]</a>.
+          </p>
+
+          <h4>Jak kalkulačka percentil počítá?</h4>
+          <p>
+            CDC popisuje růstový graf pro každý měsíc věku třemi čísly:
+            <strong>M</strong> je medián (BMI „prostředního“ dítěte),
+            <strong>S</strong> říká, jak moc se BMI dětí liší, a <strong>L</strong>
+            opravuje to, že BMI se víc rozptyluje nahoru než dolů
+            <a class="cite" href="#zdroj-15">[15]</a>. Z nich se spočítá
+            <strong>z-skóre</strong>, tedy o kolik „kroků“ (směrodatných odchylek)
+            je BMI dítěte nad mediánem nebo pod ním:
+          </p>
+          <div class="formula" role="img" aria-label="z se rovná: BMI děleno M, umocněno na L, minus 1, celé děleno L krát S">
+            <span>z =</span>
+            <span class="fraction">
+              <span class="numerator">(BMI ÷ M)<sup>L</sup> − 1</span>
+              <span class="denominator">L × S</span>
+            </span>
+          </div>
+          <p>
+            Z-skóre se nakonec převede na percentil pomocí normálního (Gaussova)
+            rozdělení. Například z-skóre 0 je přesně 50. percentil a z-skóre
+            asi 1,04 je 85. percentil.
           </p>
           <p class="small">
             <strong>Proč hranice 18 let?</strong> Tato aplikace používá hranice pro
@@ -600,6 +646,15 @@
             WHO Expert Consultation. <a href="https://pubmed.ncbi.nlm.nih.gov/14726171/" target="_blank" rel="noopener">Appropriate body-mass index for Asian populations and its implications for policy and intervention strategies</a>.
             The Lancet. 2004;363(9403):157–163.
             <span class="source-note">U části asijské populace rostou rizika už při BMI pod 25.</span>
+          </li>
+        </ol>
+
+        <h3 class="sources-group">Referenční data</h3>
+        <ol class="sources" start="15">
+          <li id="zdroj-15">
+            CDC: <a href="https://www.cdc.gov/growthcharts/cdc-data-files.htm" target="_blank" rel="noopener">Data Table of BMI-for-age Charts</a>
+            (soubor <a href="https://www.cdc.gov/growthcharts/data/zscore/bmiagerev.csv" target="_blank" rel="noopener">bmiagerev.csv</a>).
+            <span class="source-note">Čísla L, M, S, ze kterých kalkulačka počítá percentil BMI dětí.</span>
           </li>
         </ol>
       </div>
