@@ -17,6 +17,7 @@
         <ul class="main-nav">
           <li><a href="#kalkulacka">Kalkulačka</a></li>
           <li><a href="#teorie">Teorie</a></li>
+          <li><a href="#kviz">Kvíz</a></li>
           <li><a href="#zdroje">Zdroje</a></li>
         </ul>
       </nav>
@@ -572,8 +573,32 @@
       </div>
     </section>
 
+    <!-- ============ SEKCE C: KVÍZ ============ -->
+    <section id="kviz" class="section" aria-labelledby="quiz-title">
+      <div class="container">
+        <h2 id="quiz-title">Kvíz: ověřte si, co víte</h2>
+        <p class="quiz-intro">
+          10 otázek o tom, jak se BMI počítá, jak se hodnotí a co neumí.
+          Po každé odpovědi uvidíte vysvětlení a odkaz na kapitolu teorie.
+        </p>
+
+        <!-- Otázky sem doplní quiz-page.js -->
+        <ol id="quiz-list" class="quiz-list"></ol>
+
+        <div id="quiz-result" class="card quiz-result" hidden>
+          <h3 id="quiz-result-title" tabindex="-1">Výsledek: <span id="quiz-score"></span></h3>
+          <p id="quiz-score-text"></p>
+          <button type="button" id="quiz-restart" class="button quiz-restart">Zkusit znovu</button>
+        </div>
+
+        <noscript>
+          <p class="card">Kvíz potřebuje zapnutý JavaScript.</p>
+        </noscript>
+      </div>
+    </section>
+
     <!-- ============ ZDROJE ============ -->
-    <section id="zdroje" class="section" aria-labelledby="sources-title">
+    <section id="zdroje" class="section section-alt" aria-labelledby="sources-title">
       <div class="container">
         <h2 id="sources-title">Zdroje</h2>
         <p class="small">Odkazy byly zkontrolovány 31. 10. 2026. Čísla v hranatých závorkách v textu odkazují na tento seznam.</p>
@@ -671,5 +696,7 @@
   <!-- Nejdřív výpočty, potom práce se stránkou -->
   <script src="bmi.js"></script>
   <script src="script.js"></script>
+  <script src="quiz.js"></script>
+  <script src="quiz-page.js"></script>
 </body>
 </html>
