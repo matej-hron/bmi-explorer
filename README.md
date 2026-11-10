@@ -1,9 +1,10 @@
 # BMI Explorer
 
 Vzdělávací webová aplikace o indexu tělesné hmotnosti (BMI).
-Ročníkový projekt – Vojta, Scio škola, 2026. **1. milník.**
+Ročníkový projekt – Vojta, Scio škola, 2026. Podle [plánu projektu](docs/project-plan.md)
+je to první modul aplikace Health & Fitness Explorer.
 
-Aplikace má dvě části:
+Aplikace má tři části (Explorer – Theory – Knowledge Check):
 
 1. **Kalkulačka BMI** – spočítá BMI, ukáže výpočet krok za krokem a vysvětlí výsledek.
    - Dospělým (18+) ukáže kategorii podle WHO a barevnou stupnici.
@@ -12,6 +13,10 @@ Aplikace má dvě části:
      Hranice pro dospělé u dětí nikdy nepoužije.
 2. **Teorie** – co je BMI, jak se počítá, jak se hodnotí u dospělých a u dětí,
    jaká má omezení a zajímavosti. Na konci je seznam ověřených zdrojů.
+3. **Kvíz** – 10 otázek s výběrem ze čtyř možností. Po každé odpovědi ukáže,
+   jestli byla správně, vysvětlí proč a odkáže na kapitolu teorie. Na konci
+   ukáže skóre. Pořadí možností se při každém spuštění zamíchá, takže se
+   správné odpovědi nedají naučit „podle písmena“.
 
 ## Jak aplikaci spustit
 
@@ -26,9 +31,13 @@ nic instalovat ani spouštět žádný server.
 | `styles.css` | Vzhled: barvy, rozložení, úpravy pro mobil |
 | `bmi.js` | **Výpočty a pravidla**: vzorec BMI, kategorie WHO, percentily dětí podle CDC, kontrola zadaných údajů. Nesahá na stránku. |
 | `script.js` | **Práce se stránkou**: přečte formulář, zavolá funkce z `bmi.js` a zobrazí výsledek |
+| `quiz.js` | **Otázky kvízu a pravidla**: míchání odpovědí, vyhodnocení, skóre. Nesahá na stránku. |
+| `quiz-page.js` | **Kvíz na stránce**: vykreslí otázky, reaguje na kliknutí, ukáže vysvětlení a výsledek |
 | `tests/bmi.test.js` | Automatické testy výpočtů |
+| `tests/quiz.test.js` | Automatické testy kvízu |
 
 Výpočty (`bmi.js`) jsou schválně oddělené od práce se stránkou (`script.js`).
+Stejně tak kvíz: otázky a pravidla jsou v `quiz.js`, práce se stránkou v `quiz-page.js`.
 Díky tomu jdou výpočty otestovat bez prohlížeče a každý soubor má jednu úlohu.
 
 ### Jak to funguje (zjednodušeně)
@@ -56,7 +65,10 @@ Testy kontrolují například:
 - že pod 18 let se nikdy nepoužijí kategorie pro dospělé,
 - percentily dětí proti hodnotám z tabulky CDC (5., 50., 85. a 95. percentil),
 - že rozmezí BMI v legendě pro děti přesně odpovídají kategoriím (všechny věky, obě pohlaví),
-- kontrolu zadaných údajů (prázdná políčka, písmena, nesmyslné hodnoty, výška v metrech).
+- kontrolu zadaných údajů (prázdná políčka, písmena, nesmyslné hodnoty, výška v metrech),
+- kvíz: každá otázka má 4 různé možnosti a právě jednu správnou, odkazy vedou
+  na existující kapitoly, početní otázka souhlasí s kalkulačkou, míchání
+  nemění správné odpovědi a skóre se počítá správně.
 
 ## Zveřejnění na GitHub Pages
 
