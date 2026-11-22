@@ -27,6 +27,10 @@ Každý tematický modul bude podle možností obsahovat:
 
 - **Konec prosince:** dokončený BMI Explorer.
 - **Konec ledna:** použitelný Heart Rate Explorer s podporou kompatibilního Bluetooth monitoru.
+  Modul vzniká ve dvou částech:
+  1. **Srdce a krevní oběh** (`srdce.html`) – teorie, animace srdce a oběhu, kvíz
+     (návrh: [srdce-navrh.md](srdce-navrh.md)),
+  2. **Měření tepu** – Bluetooth monitor, tep v reálném čase, tepové zóny.
 - **Konec února:** použitelný Energy Explorer.
 - **Konec března:** použitelný VO₂ Max Explorer s Cooperovým testem a analýzou tepu.
 - **Konec dubna:** kompletní propojená aplikace, otestovaná a funkční.

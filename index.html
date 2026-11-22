@@ -9,11 +9,22 @@
 </head>
 <body>
 
-  <!-- ============ HLAVIČKA A NAVIGACE ============ -->
+  <!-- ============ HLAVIČKA A NAVIGACE ============
+       Horní řádek (logo a přepínač modulů) je stejný na všech stránkách.
+       Když ho tady změníte, upravte ho i v srdce.html.
+       Spodní řádek jsou odkazy na části TÉTO stránky. -->
   <header class="site-header">
     <div class="container header-inner">
-      <a class="logo" href="#top">BMI <span>Explorer</span></a>
-      <nav aria-label="Hlavní navigace">
+      <a class="logo" href="index.html">Health &amp; Fitness <span>Explorer</span></a>
+      <nav aria-label="Moduly">
+        <ul class="module-nav">
+          <li><a href="index.html" aria-current="page">BMI</a></li>
+          <li><a href="srdce.html">Srdce a oběh</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="header-sections">
+      <nav class="container" aria-label="Části stránky">
         <ul class="main-nav">
           <li><a href="#kalkulacka">Kalkulačka</a></li>
           <li><a href="#teorie">Teorie</a></li>
@@ -688,7 +699,7 @@
 
   <footer class="site-footer">
     <div class="container">
-      <p><strong>BMI Explorer</strong> · ročníkový projekt · Vojta, Scio škola · 2026</p>
+      <p><strong>Health &amp; Fitness Explorer</strong> · modul BMI · ročníkový projekt · Vojta, Scio škola · 2026</p>
       <p class="small">Aplikace slouží ke vzdělávání a nenahrazuje radu lékaře.</p>
     </div>
   </footer>
@@ -697,6 +708,7 @@
   <script src="bmi.js"></script>
   <script src="script.js"></script>
   <script src="quiz.js"></script>
+  <script src="quiz-bmi.js"></script>
   <script src="quiz-page.js"></script>
 </body>
 </html>
