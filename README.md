@@ -1,10 +1,13 @@
-# BMI Explorer
+# Health & Fitness Explorer
 
-Vzdělávací webová aplikace o indexu tělesné hmotnosti (BMI).
-Ročníkový projekt – Vojta, Scio škola, 2026. Podle [plánu projektu](docs/project-plan.md)
-je to první modul aplikace Health & Fitness Explorer.
+Vzdělávací webová aplikace o lidském těle, zdraví a sportu.
+Ročníkový projekt – Vojta, Scio škola, 2026–2027. Postup je popsaný
+v [plánu projektu](docs/project-plan.md).
 
-Aplikace má tři části (Explorer – Theory – Knowledge Check):
+Aplikace má zatím dva moduly. Mezi nimi se přepíná v hlavičce stránky
+(„BMI | Srdce a oběh“). Každý modul má tři části: Explorer – Theory – Knowledge Check.
+
+## Modul 1: BMI Explorer (`index.html`)
 
 1. **Kalkulačka BMI** – spočítá BMI, ukáže výpočet krok za krokem a vysvětlí výsledek.
    - Dospělým (18+) ukáže kategorii podle WHO a barevnou stupnici.
@@ -18,29 +21,54 @@ Aplikace má tři části (Explorer – Theory – Knowledge Check):
    ukáže skóre. Pořadí možností se při každém spuštění zamíchá, takže se
    správné odpovědi nedají naučit „podle písmena“.
 
+## Modul 2: Srdce a krevní oběh (`srdce.html`)
+
+První část lednového modulu Heart Rate Explorer: nejdřív teorie a vizualizace,
+měření tepu z Bluetooth měřiče přijde v další části.
+
+1. **Vizualizace** – animované srdce v řezu (4 dutiny, chlopně, cévy) a vedle něj
+   schéma malého a velkého krevního oběhu s tečkami krve.
+   - Posuvník tepu (40–200) a předvolby Spánek / Klid / Chůze / Běh srdce zrychlí.
+   - Tlačítka **Pozastavit** a **Krok** – fázemi srdečního cyklu se dá procházet
+     jednu po druhé (systola síní → systola komor → diastola).
+   - Časová osa jednoho úderu ukazuje, že při rychlém tepu se nejvíc zkracuje diastola.
+   - Spočítá, kolik krve srdce přečerpá za minutu a za den a kolikrát za den udeří.
+2. **Teorie** – 7 kapitol: k čemu je oběh, stavba srdce a chlopně, malý a velký oběh
+   (tepny × žíly), srdeční cyklus a ozvy „lub-dub“, sinusový uzel, tep a minutový
+   objem (včetně tabulky tepu dětí a návodu, jak si tep změřit), omezení modelu.
+3. **Kvíz** – 10 otázek, funguje stejně jako kvíz o BMI.
+
 ## Jak aplikaci spustit
 
-Stačí otevřít soubor `index.html` v prohlížeči (dvojklikem). Není potřeba
-nic instalovat ani spouštět žádný server.
+Stačí otevřít soubor `index.html` (nebo `srdce.html`) v prohlížeči (dvojklikem).
+Není potřeba nic instalovat ani spouštět žádný server.
 
 ## Soubory
 
 | Soubor | Co v něm je |
 |---|---|
-| `index.html` | Obsah stránky: navigace, formulář, místo pro výsledek, texty teorie, zdroje |
-| `styles.css` | Vzhled: barvy, rozložení, úpravy pro mobil |
-| `bmi.js` | **Výpočty a pravidla**: vzorec BMI, kategorie WHO, percentily dětí podle CDC, kontrola zadaných údajů. Nesahá na stránku. |
-| `script.js` | **Práce se stránkou**: přečte formulář, zavolá funkce z `bmi.js` a zobrazí výsledek |
-| `quiz.js` | **Otázky kvízu a pravidla**: míchání odpovědí, vyhodnocení, skóre. Nesahá na stránku. |
+| `index.html` | Stránka modulu BMI: navigace, formulář, místo pro výsledek, texty teorie, kvíz, zdroje |
+| `srdce.html` | Stránka modulu Srdce a oběh: obrázky srdce a oběhu (SVG), ovládání, teorie, kvíz, zdroje |
+| `styles.css` | Vzhled obou stránek: barvy, rozložení, úpravy pro mobil |
+| `bmi.js` | **Výpočty BMI**: vzorec, kategorie WHO, percentily dětí podle CDC, kontrola zadaných údajů. Nesahá na stránku. |
+| `script.js` | **Kalkulačka BMI na stránce**: přečte formulář, zavolá funkce z `bmi.js` a zobrazí výsledek |
+| `srdce.js` | **Výpočty pro srdce**: délka úderu a fází, ve které fázi srdce je, minutový objem, údery a litry za den. Nesahá na stránku. |
+| `srdce-page.js` | **Animace srdce na stránce**: zmenšuje dutiny, přepíná chlopně, posouvá tečky krve, obsluhuje posuvník a tlačítka |
+| `quiz.js` | **Pravidla kvízu** (společná pro oba moduly): míchání odpovědí, vyhodnocení, skóre. Nesahá na stránku. |
+| `quiz-bmi.js`, `quiz-srdce.js` | **Otázky kvízu** – každá stránka si načte jen svůj soubor |
 | `quiz-page.js` | **Kvíz na stránce**: vykreslí otázky, reaguje na kliknutí, ukáže vysvětlení a výsledek |
-| `tests/bmi.test.js` | Automatické testy výpočtů |
-| `tests/quiz.test.js` | Automatické testy kvízu |
+| `tests/bmi.test.js` | Automatické testy výpočtů BMI |
+| `tests/srdce.test.js` | Automatické testy výpočtů pro srdce |
+| `tests/quiz.test.js` | Automatické testy kvízu (obě sady otázek) |
+| `docs/project-plan.md` | Plán celého projektu po měsících |
+| `docs/srdce-navrh.md` | Návrh modulu Srdce a oběh (co a proč jsme se rozhodli udělat) |
 
-Výpočty (`bmi.js`) jsou schválně oddělené od práce se stránkou (`script.js`).
-Stejně tak kvíz: otázky a pravidla jsou v `quiz.js`, práce se stránkou v `quiz-page.js`.
+Výpočty (`bmi.js`, `srdce.js`) jsou schválně oddělené od práce se stránkou
+(`script.js`, `srdce-page.js`). Stejně tak kvíz: pravidla jsou v `quiz.js`,
+otázky v `quiz-bmi.js` / `quiz-srdce.js` a práce se stránkou v `quiz-page.js`.
 Díky tomu jdou výpočty otestovat bez prohlížeče a každý soubor má jednu úlohu.
 
-### Jak to funguje (zjednodušeně)
+### Jak funguje kalkulačka BMI (zjednodušeně)
 
 1. Uživatel vyplní formulář a stiskne **Spočítat BMI**.
 2. `script.js` přečte hodnoty a předá je funkci `validateInputs()` z `bmi.js`.
@@ -49,6 +77,18 @@ Díky tomu jdou výpočty otestovat bez prohlížeče a každý soubor má jednu
 5. `interpretBmi()` rozhodne: dospělý → kategorie WHO, dítě → `getBmiPercentile()`
    spočítá percentil a `getChildCategory()` k němu najde kategorii CDC.
 6. `script.js` výsledek vypíše na stránku.
+
+### Jak funguje animace srdce (zjednodušeně)
+
+1. `srdce-page.js` si pamatuje, kolik sekund uběhlo od začátku aktuálního úderu.
+2. Prohlížeč ho asi 60× za sekundu zavolá (`requestAnimationFrame`) a čas se posune.
+3. `getPhaseAt()` ze `srdce.js` řekne, ve které fázi srdce je a jak daleko v ní.
+4. Podle toho se dutina, která se právě stahuje, zmenší (víc uprostřed stahu, funkce sinus).
+   Chlopně a šipky přepíná CSS podle atributu `data-phase` na obrázku.
+5. Tečky krve se posouvají po smyčkách oběhu (`getPointAtLength`). V polovině smyčky,
+   tedy v plicích nebo v těle, změní barvu.
+6. Když uživatel změní tep, `getCardiacOutput()`, `getBeatsPerDay()` a `getPhaseDurations()`
+   přepočítají čísla a časovou osu.
 
 ## Testy
 
@@ -66,9 +106,13 @@ Testy kontrolují například:
 - percentily dětí proti hodnotám z tabulky CDC (5., 50., 85. a 95. percentil),
 - že rozmezí BMI v legendě pro děti přesně odpovídají kategoriím (všechny věky, obě pohlaví),
 - kontrolu zadaných údajů (prázdná políčka, písmena, nesmyslné hodnoty, výška v metrech),
-- kvíz: každá otázka má 4 různé možnosti a právě jednu správnou, odkazy vedou
-  na existující kapitoly, početní otázka souhlasí s kalkulačkou, míchání
-  nemění správné odpovědi a skóre se počítá správně.
+- srdce: délka úderu (75 tepů → 0,8 s), délky fází v klidu (0,1 / 0,3 / 0,4 s),
+  že fáze dají dohromady vždy celý úder, že při rychlém tepu se nejvíc zkrátí
+  diastola, minutový objem (70 × 70 ml = 4,9 l), údery za den, kontrola tepu
+  a české psaní čísel,
+- kvíz (obě sady otázek): každá otázka má 4 různé možnosti a právě jednu správnou,
+  odkazy vedou na existující kapitoly na správné stránce, početní otázky souhlasí
+  s výpočty, míchání nemění správné odpovědi a skóre se počítá správně.
 
 ## Zveřejnění na GitHub Pages
 
@@ -89,11 +133,13 @@ Testy kontrolují například:
 4. V části **Build and deployment** zvolte **Source: Deploy from a branch**,
    větev **main** a složku **/ (root)**. Klikněte na **Save**.
 5. Za minutu nebo dvě bude stránka na adrese
-   `https://UZIVATEL.github.io/bmi-explorer/`.
+   `https://UZIVATEL.github.io/bmi-explorer/` (modul o srdci na `…/srdce.html`).
 
 ## Odborná rozhodnutí
 
 Tato rozhodnutí se hodí znát při obhajobě projektu:
+
+### Modul BMI
 
 - **Zaokrouhlení a kategorie.** Kategorie se určuje ze zaokrouhleného BMI
   (na jedno desetinné místo), aby vždy odpovídala číslu, které uživatel vidí.
@@ -122,6 +168,29 @@ Tato rozhodnutí se hodí znát při obhajobě projektu:
   U dětí je nutné: chlapci a dívky mají každý svou tabulku percentilů.
 - **Desetinná čárka.** Kalkulačka přijímá „70,5“ i „70.5“.
 
+### Modul Srdce a oběh
+
+- **Tři fáze místo více.** Fyziologie dělí srdeční cyklus jemněji. Pro vizualizaci
+  stačí tři fáze, které jsou dobře vidět: systola síní, systola komor, diastola.
+- **Délky fází jednoduchým pravidlem.** Systola síní = osmina úderu, systola komor
+  = 0,3 s (nejvýš polovina úderu), diastola = zbytek. Při 75 tepech to dá
+  0,1 / 0,3 / 0,4 s. Učebnice OpenStax uvádí asi 100 / 270 / 430 ms, takže model
+  čísla zaokrouhluje, ale ukazuje hlavní věc: při rychlém tepu se zkracuje hlavně diastola.
+- **Tepový objem pevně 70 ml.** Je to hodnota pro dospělého v klidu (OpenStax).
+  Ve skutečnosti se liší podle člověka a při sportu roste, takže minutový objem
+  při běhu je ve skutečnosti vyšší. Na stránce je to vysvětleno.
+- **Schéma, ne anatomie.** Srdce je nakreslené jako v učebnici: dutiny jsou obdélníky
+  a cévy se nekříží, aby bylo jasné, kudy teče krev. Pravá polovina srdce je na
+  obrázku vlevo, protože se na člověka díváme zepředu.
+- **Modrá a červená.** Odkysličená krev je na obrázcích modrá jen podle zvyklosti,
+  ve skutečnosti je tmavě červená. Na stránce je to vysvětleno.
+- **Rychlost teček není skutečná.** Tečka oběhne smyčku za 6 úderů. Je to tak,
+  aby byl pohyb dobře vidět a zrychloval s tepem.
+- **Vypnuté animace.** Kdo má v systému zapnuté „omezit pohyb“
+  (`prefers-reduced-motion`), tomu se animace nespustí sama a fázemi prochází tlačítkem Krok.
+- **Tep dětí** uvádíme z tabulky Cleveland Clinic. Ruční měření tepu popisujeme
+  podle NHLBI (počítat 30 s a vynásobit dvěma).
+
 ## Zdroje
 
 Úplný seznam s odkazy je přímo v aplikaci (sekce **Zdroje**). Hlavní zdroje:
@@ -135,5 +204,19 @@ Tato rozhodnutí se hodí znát při obhajobě projektu:
 - SZÚ – [Růstové grafy ke stažení](https://szu.gov.cz/publikace-szu/data/hodnoceni-rustu-a-vyvoje/rustove-grafy-ke-stazeni/)
 - Odborné články z PubMed (Eknoyan 2008, Keys 1972, Nuttall 2015, Romero-Corral 2008,
   Rolland-Cachera 1984, WHO Expert Consultation 2004)
+
+Modul Srdce a oběh:
+
+- NHLBI – [How the Heart Works](https://www.nhlbi.nih.gov/health/heart/anatomy)
+  (stavba srdce, průtok krve, jak srdce bije)
+- American Heart Association – [All About Heart Rate](https://www.heart.org/en/health-topics/high-blood-pressure/the-facts-about-high-blood-pressure/all-about-heart-rate-pulse)
+- Cleveland Clinic – [Heart](https://my.clevelandclinic.org/health/articles/21704-heart),
+  [Cardiac Output](https://my.clevelandclinic.org/health/diagnostics/23344-cardiac-output),
+  [Children's Vital Signs](https://health.clevelandclinic.org/pediatric-vital-signs/),
+  [Facts About Your Heart](https://health.clevelandclinic.org/facts-about-the-heart)
+- OpenStax – Anatomy and Physiology 2e, kapitoly
+  [19.1 Heart Anatomy](https://openstax.org/books/anatomy-and-physiology-2e/pages/19-1-heart-anatomy)
+  a [19.3 Cardiac Cycle](https://openstax.org/books/anatomy-and-physiology-2e/pages/19-3-cardiac-cycle)
+- Live Science – [If blood is red, why do veins look bluish?](https://www.livescience.com/why-veins-blue-arteries-red)
 
 Aplikace slouží ke vzdělávání a nenahrazuje radu lékaře.

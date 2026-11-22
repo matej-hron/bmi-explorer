@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Srdce a krevní oběh – jak pracuje srdce</title>
+  <meta name="description" content="Podívejte se, jak srdce pumpuje krev, co se děje při jednom úderu a jak funguje malý a velký krevní oběh.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- ============ HLAVIČKA A NAVIGACE ============
+       Horní řádek (logo a přepínač modulů) je stejný na všech stránkách.
+       Když ho tady změníte, upravte ho i v index.html.
+       Spodní řádek jsou odkazy na části TÉTO stránky. -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="logo" href="index.html">Health &amp; Fitness <span>Explorer</span></a>
+      <nav aria-label="Moduly">
+        <ul class="module-nav">
+          <li><a href="index.html">BMI</a></li>
+          <li><a href="srdce.html" aria-current="page">Srdce a oběh</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="header-sections">
+      <nav class="container" aria-label="Části stránky">
+        <ul class="main-nav">
+          <li><a href="#vizualizace">Vizualizace</a></li>
+          <li><a href="#teorie">Teorie</a></li>
+          <li><a href="#kviz">Kvíz</a></li>
+          <li><a href="#zdroje">Zdroje</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+
+    <!-- ============ ÚVOD ============ -->
+    <section class="hero">
+      <div class="container">
+        <p class="eyebrow">Srdce a krevní oběh</p>
+        <h1>Pumpa, která nikdy nespí</h1>
+        <p class="lead">
+          Podívejte se, co se v srdci děje při jednom úderu, kudy teče krev
+          a co se změní, když srdce zrychlí.
+        </p>
+      </div>
+    </section>
+
+    <!-- ============ SEKCE A: VIZUALIZACE ============ -->
+    <section id="vizualizace" class="section" aria-labelledby="explorer-title">
+      <div class="container">
+        <h2 id="explorer-title">Jak srdce pracuje</h2>
+        <p class="section-intro">
+          Posuňte tep nebo vyberte činnost a sledujte, jak se srdce stahuje,
+          jak se otevírají chlopně a jak rychle obíhá krev.
+          Tlačítkem <strong>Krok</strong> můžete jít fázemi jednu po druhé.
+        </p>
+
+        <div class="heart-explorer">
+
+          <!-- Srdce v řezu. Souřadnice: x od -60 do 400, y od 0 do 380.
+               Pravá polovina srdce je na obrázku VLEVO (díváme se na člověka zepředu). -->
+          <figure class="figure heart-figure">
+            <svg id="heart-svg" class="heart-svg" viewBox="-60 0 460 380" role="img"
+                 aria-labelledby="heart-svg-title heart-svg-desc" data-phase="atria">
+              <title id="heart-svg-title">Srdce v řezu</title>
+              <desc id="heart-svg-desc">Schéma srdce se dvěma síněmi nahoře a dvěma komorami dole.
+                Pravá polovina s odkysličenou krví je nakreslená modře, levá s okysličenou krví červeně.</desc>
+
+              <!-- Hrot šipky, který se přidá na konec každé šipky toku krve -->
+              <defs>
+                <marker id="arrowhead" viewBox="0 0 10 10" refX="6" refY="5"
+                        markerWidth="3.5" markerHeight="3.5" orient="auto">
+                  <path d="M0 0 L10 5 L0 10 z" fill="#fff"/>
+                </marker>
+              </defs>
+
+              <!-- Cévy (trubky). Kreslíme je jako první, aby byly pod dutinami. -->
+              <g class="vessels">
+                <!-- horní dutá žíla: z těla do pravé síně -->
+                <rect class="vessel vessel-blue" x="70" y="18" width="34" height="90" rx="6"/>
+                <!-- dolní dutá žíla: z těla do pravé síně (zleva) -->
+                <rect class="vessel vessel-blue" x="-24" y="140" width="72" height="30" rx="6"/>
+                <!-- plicní tepna: z pravé komory do plic -->
+                <rect class="vessel vessel-blue" x="156" y="30" width="34" height="175" rx="6"/>
+                <!-- aorta: z levé komory do těla -->
+                <rect class="vessel vessel-red" x="210" y="30" width="34" height="175" rx="6"/>
+                <!-- plicní žíly: z plic do levé síně -->
+                <rect class="vessel vessel-red" x="296" y="18" width="34" height="90" rx="6"/>
+              </g>
+
+              <!-- Čtyři dutiny. srdce-page.js je zmenšuje, když se stahují. -->
+              <g id="chamber-ra" class="chamber">
+                <rect class="blood-blue" x="40" y="100" width="110" height="80" rx="18"/>
+                <text class="chamber-label" x="95" y="145">pravá síň</text>
+              </g>
+              <g id="chamber-la" class="chamber">
+                <rect class="blood-red" x="250" y="100" width="110" height="80" rx="18"/>
+                <text class="chamber-label" x="305" y="145">levá síň</text>
+              </g>
+              <g id="chamber-rv" class="chamber">
+                <rect class="blood-blue" x="40" y="196" width="150" height="140" rx="26"/>
+                <text class="chamber-label" x="115" y="275">pravá komora</text>
+              </g>
+              <g id="chamber-lv" class="chamber">
+                <!-- levá komora má silnější stěnu (tlustší obrys) -->
+                <rect class="blood-red wall-thick" x="214" y="196" width="146" height="140" rx="26"/>
+                <text class="chamber-label" x="287" y="275">levá komora</text>
+              </g>
+
+              <!-- Chlopně. Každý cíp se otáčí kolem svého pantu (transform-origin).
+                   --open = o kolik stupňů se cíp otočí, když je chlopeň otevřená. -->
+              <!-- Cípaté chlopně (mezi síní a komorou): otevírají se dolů do komory -->
+              <g class="valve valve-av" aria-hidden="true">
+                <line class="leaflet" x1="62" y1="188" x2="95" y2="188" style="--open: 70deg; transform-origin: 62px 188px"/>
+                <line class="leaflet" x1="128" y1="188" x2="95" y2="188" style="--open: -70deg; transform-origin: 128px 188px"/>
+                <line class="leaflet" x1="272" y1="188" x2="305" y2="188" style="--open: 70deg; transform-origin: 272px 188px"/>
+                <line class="leaflet" x1="338" y1="188" x2="305" y2="188" style="--open: -70deg; transform-origin: 338px 188px"/>
+              </g>
+              <!-- Poloměsíčité chlopně (na začátku plicní tepny a aorty): otevírají se nahoru -->
+              <g class="valve valve-semilunar" aria-hidden="true">
+                <line class="leaflet" x1="158" y1="200" x2="173" y2="200" style="--open: -70deg; transform-origin: 158px 200px"/>
+                <line class="leaflet" x1="188" y1="200" x2="173" y2="200" style="--open: 70deg; transform-origin: 188px 200px"/>
+                <line class="leaflet" x1="212" y1="200" x2="227" y2="200" style="--open: -70deg; transform-origin: 212px 200px"/>
+                <line class="leaflet" x1="242" y1="200" x2="227" y2="200" style="--open: 70deg; transform-origin: 242px 200px"/>
+              </g>
+
+              <!-- Šipky ukazují, kudy teče krev v aktuální fázi -->
+              <g class="flow flow-veins" aria-hidden="true">
+                <path class="arrow" d="M87 40 V90"/>
+                <path class="arrow" d="M-16 155 H40"/>
+                <path class="arrow" d="M313 40 V90"/>
+              </g>
+              <g class="flow flow-av" aria-hidden="true">
+                <path class="arrow" d="M95 160 V225"/>
+                <path class="arrow" d="M305 160 V225"/>
+              </g>
+              <g class="flow flow-out" aria-hidden="true">
+                <path class="arrow" d="M173 250 V50"/>
+                <path class="arrow" d="M227 250 V50"/>
+              </g>
+
+              <!-- Popisky cév -->
+              <text class="vessel-label" x="87" y="12">horní dutá žíla</text>
+              <text class="vessel-label anchor-start" x="-58" y="120">dolní dutá</text>
+              <text class="vessel-label anchor-start" x="-58" y="133">žíla</text>
+              <text class="vessel-label anchor-end" x="192" y="24">plicní tepna</text>
+              <text class="vessel-label anchor-start" x="208" y="24">aorta</text>
+              <text class="vessel-label" x="313" y="12">plicní žíly</text>
+              <text class="vessel-label" x="200" y="372">přepážka odděluje pravou a levou polovinu</text>
+            </svg>
+            <figcaption>
+              Díváme se na člověka zepředu, proto je jeho <strong>pravá</strong> polovina srdce
+              na obrázku <strong>vlevo</strong>. Šipky ukazují, kudy právě teče krev.
+            </figcaption>
+          </figure>
+
+          <!-- Malý a velký krevní oběh. Souřadnice: šířka 300, výška 400. -->
+          <figure class="figure heart-figure">
+            <svg id="circulation-svg" class="circulation-svg" viewBox="0 0 300 400" role="img"
+                 aria-labelledby="circ-svg-title circ-svg-desc">
+              <title id="circ-svg-title">Malý a velký krevní oběh</title>
+              <desc id="circ-svg-desc">Krev z pravé poloviny srdce teče do plic, kde nabere kyslík,
+                a vrací se do levé poloviny. Odtud teče do celého těla, kde kyslík odevzdá,
+                a vrací se do pravé poloviny srdce.</desc>
+
+              <!-- Plíce a tělo -->
+              <rect class="organ organ-lungs" x="70" y="20" width="160" height="60" rx="16"/>
+              <text class="organ-label" x="150" y="40">plíce</text>
+              <rect class="organ organ-body" x="60" y="318" width="180" height="64" rx="16"/>
+              <text class="organ-label" x="150" y="374">tělo (svaly, mozek, orgány)</text>
+
+              <!-- Cévy: první polovina smyčky jednou barvou, druhá druhou -->
+              <path class="loop loop-blue" d="M120 160 V50 H150"/>
+              <path class="loop loop-red" d="M150 50 H180 V160"/>
+              <path class="loop loop-red" d="M180 240 V350 H150"/>
+              <path class="loop loop-blue" d="M150 350 H120 V240"/>
+
+              <!-- Celé smyčky pro pohyb teček (neviditelné) -->
+              <path id="loop-small" class="loop-track" d="M120 160 V50 H180 V160"/>
+              <path id="loop-large" class="loop-track" d="M180 240 V350 H120 V240"/>
+
+              <!-- Srdce: levá půlka obrázku = pravá polovina srdce -->
+              <g id="circ-heart">
+                <rect class="blood-blue" x="90" y="160" width="58" height="80" rx="12"/>
+                <rect class="blood-red" x="152" y="160" width="58" height="80" rx="12"/>
+                <text class="organ-label organ-label-light" x="119" y="196">pravá</text>
+                <text class="organ-label organ-label-light" x="119" y="212">půlka</text>
+                <text class="organ-label organ-label-light" x="181" y="196">levá</text>
+                <text class="organ-label organ-label-light" x="181" y="212">půlka</text>
+              </g>
+
+              <!-- Tečky krve sem doplní srdce-page.js -->
+              <g id="blood-dots" aria-hidden="true"></g>
+
+              <!-- Názvy oběhů -->
+              <text class="loop-label anchor-start" x="240" y="115">malý</text>
+              <text class="loop-label anchor-start" x="240" y="130">(plicní)</text>
+              <text class="loop-label anchor-start" x="240" y="145">oběh</text>
+              <text class="loop-label anchor-start" x="240" y="275">velký</text>
+              <text class="loop-label anchor-start" x="240" y="290">(tělní)</text>
+              <text class="loop-label anchor-start" x="240" y="305">oběh</text>
+            </svg>
+            <figcaption>
+              Krev v plicích nabere kyslík (zčervená) a v těle ho odevzdá (zmodrá).
+              Rychlost teček není skutečná, jen ukazuje, že rychlejší tep = rychlejší oběh.
+            </figcaption>
+          </figure>
+        </div>
+
+        <ul class="heart-legend" aria-label="Vysvětlivky">
+          <li><span class="swatch swatch-red"></span> okysličená krev</li>
+          <li><span class="swatch swatch-blue"></span> odkysličená krev</li>
+          <li><span class="legend-arrow" aria-hidden="true">→</span> kudy právě teče krev</li>
+        </ul>
+
+        <!-- Ovládání a výsledky -->
+        <div class="card heart-panel">
+          <div class="phase-info">
+            <p class="result-label">Právě teď</p>
+            <h3 id="phase-name" class="phase-name">Systola síní – síně se stahují</h3>
+            <p id="phase-text" class="phase-text"></p>
+            <!-- Text pro čtečku obrazovky. Mění se jen po stisku Krok,
+                 aby čtečka nečetla fáze pořád dokola. -->
+            <p id="phase-announce" class="visually-hidden" aria-live="polite"></p>
+          </div>
+
+          <div class="timeline">
+            <p class="timeline-title">Jeden úder trvá <strong id="cycle-duration">0,86 s</strong></p>
+            <div class="timeline-bar" aria-hidden="true">
+              <div id="timeline-atria" class="timeline-segment seg-atria">síně</div>
+              <div id="timeline-ventricles" class="timeline-segment seg-ventricles">komory</div>
+              <div id="timeline-diastole" class="timeline-segment seg-diastole">diastola</div>
+              <div id="timeline-marker" class="timeline-marker"></div>
+            </div>
+            <p class="small">
+              Barevné úseky ukazují, jak dlouho trvá každá fáze. Zkuste tep zvýšit
+              a sledujte, který úsek se zkracuje nejvíc.
+            </p>
+          </div>
+
+          <div class="heart-controls">
+            <div class="bpm-control">
+              <label for="bpm">Tep</label>
+              <input type="range" id="bpm" min="40" max="200" step="1" value="70">
+              <output id="bpm-value" for="bpm" class="bpm-value">70</output>
+              <span class="unit-text">tepů za minutu</span>
+            </div>
+
+            <!-- Tlačítka předvoleb sem doplní srdce-page.js (podle PRESETS v srdce.js) -->
+            <div id="presets" class="presets" role="group" aria-label="Předvolby tepu"></div>
+
+            <div class="play-controls">
+              <button type="button" id="play-toggle" class="button button-secondary">Pozastavit</button>
+              <button type="button" id="step" class="button button-secondary">Krok ▸</button>
+            </div>
+          </div>
+
+          <dl class="heart-stats">
+            <div>
+              <dt>Za minutu srdce přečerpá</dt>
+              <dd id="stat-output">4,9 l</dd>
+            </div>
+            <div>
+              <dt>Úderů za den</dt>
+              <dd id="stat-beats">100 800</dd>
+            </div>
+            <div>
+              <dt>Litrů krve za den</dt>
+              <dd id="stat-liters">7 056 l</dd>
+            </div>
+          </dl>
+          <p class="small">
+            Počítáme s tepovým objemem 70 ml (tolik krve vypudí levá komora při jednom
+            stahu u dospělého v klidu). Minutový objem = tep × 70 ml.
+            Proč je to jen přiblížení, se dočtete v kapitole
+            <a href="#omezeni">Co náš model zjednodušuje</a>.
+          </p>
+        </div>
+
+        <noscript>
+          <p class="card">Animace potřebuje zapnutý JavaScript. Teorie níže funguje i bez něj.</p>
+        </noscript>
+      </div>
+    </section>
+
+    <!-- ============ SEKCE B: TEORIE ============ -->
+    <section id="teorie" class="section section-alt" aria-labelledby="theory-title">
+      <div class="container">
+        <h2 id="theory-title">Teorie: srdce a krevní oběh</h2>
+
+        <nav aria-label="Kapitoly teorie">
+          <ol class="chapters">
+            <li><a href="#k-cemu">K čemu to je?</a></li>
+            <li><a href="#stavba">Stavba srdce</a></li>
+            <li><a href="#obeh">Malý a velký oběh</a></li>
+            <li><a href="#cyklus">Srdeční cyklus</a></li>
+            <li><a href="#vzruch">Kdo dává rytmus</a></li>
+            <li><a href="#tep">Tep a minutový objem</a></li>
+            <li><a href="#omezeni">Omezení a zajímavosti</a></li>
+          </ol>
+        </nav>
+
+        <!-- 1. K čemu to je? -->
+        <article id="k-cemu" class="card article">
+          <h3><span class="chapter-number">1</span> K čemu je srdce a krevní oběh?</h3>
+          <p>
+            Každá buňka v těle potřebuje <strong>kyslík</strong> a <strong>živiny</strong>
+            a vzniká v ní odpad, například <strong>oxid uhličitý (CO₂)</strong>.
+            Buňky si pro nic z toho dojít nemohou. Proto tělo potřebuje dopravní
+            systém: <strong>krevní oběh</strong>.
+          </p>
+          <ul>
+            <li><strong>Krev</strong> je „náklad“: nese kyslík, živiny, odpadní látky i teplo.</li>
+            <li><strong>Cévy</strong> jsou „silnice“: trubice, kterými krev teče po celém těle.</li>
+            <li><strong>Srdce</strong> je „pumpa“: sval, který krev pořád pohání dokola
+              <a class="cite" href="#zdroj-2">[2]</a>.</li>
+          </ul>
+          <p>
+            Krev v těle neteče „tam a zpátky“, ale <strong>pořád dokola</strong>, proto se
+            mluví o krevním <em>oběhu</em>.
+          </p>
+        </article>
+
+        <!-- 2. Stavba srdce -->
+        <article id="stavba" class="card article">
+          <h3><span class="chapter-number">2</span> Jak je srdce postavené?</h3>
+          <p>
+            Srdce je dutý sval velký zhruba jako <strong>pěst</strong>. U dospělé ženy
+            váží asi 250–300 g, u muže asi 300–350 g <a class="cite" href="#zdroj-9">[9]</a>.
+            Uvnitř má <strong>čtyři dutiny</strong> <a class="cite" href="#zdroj-1">[1]</a>:
+          </p>
+          <div class="two-columns">
+            <div class="box box-blue">
+              <p class="box-title">Pravá polovina</p>
+              <ul>
+                <li><strong>pravá síň</strong> – přijímá krev z těla</li>
+                <li><strong>pravá komora</strong> – posílá krev do plic</li>
+                <li>krev je tu <strong>odkysličená</strong> (s málem kyslíku)</li>
+              </ul>
+            </div>
+            <div class="box box-red">
+              <p class="box-title">Levá polovina</p>
+              <ul>
+                <li><strong>levá síň</strong> – přijímá krev z plic</li>
+                <li><strong>levá komora</strong> – posílá krev do celého těla</li>
+                <li>krev je tu <strong>okysličená</strong> (s kyslíkem z plic)</li>
+              </ul>
+            </div>
+          </div>
+          <p>
+            <strong>Síně</strong> jsou nahoře a krev do nich přitéká. <strong>Komory</strong>
+            jsou dole a krev z nich vytéká ven ze srdce. Pravou a levou polovinu odděluje
+            <strong>přepážka</strong>, takže se krev z obou polovin nemíchá
+            <a class="cite" href="#zdroj-1">[1]</a><a class="cite" href="#zdroj-2">[2]</a>.
+          </p>
+
+          <h4>Chlopně: dvířka, která se otevírají jen jedním směrem</h4>
+          <p>
+            Srdce má <strong>čtyři chlopně</strong> <a class="cite" href="#zdroj-2">[2]</a>.
+            Fungují jako dvířka: krev pustí dopředu, ale zpátky ne.
+          </p>
+          <ul>
+            <li><strong>trojcípá chlopeň</strong> – mezi pravou síní a pravou komorou,</li>
+            <li><strong>dvojcípá (mitrální) chlopeň</strong> – mezi levou síní a levou komorou,</li>
+            <li><strong>plicnicová chlopeň</strong> – mezi pravou komorou a plicní tepnou,</li>
+            <li><strong>aortální chlopeň</strong> – mezi levou komorou a aortou.</li>
+          </ul>
+          <p>
+            Prvním dvěma se říká <strong>cípaté</strong> (mají cípy), dalším dvěma
+            <strong>poloměsíčité</strong> (mají tvar půlměsíců).
+          </p>
+
+          <h4>Proč je levá komora silnější?</h4>
+          <p>
+            Obě komory přečerpají stejné množství krve. Pravá komora ji ale posílá jen do
+            blízkých plic, kdežto levá ji musí protlačit <strong>celým tělem</strong>,
+            od hlavy až po prsty u nohou. Potřebuje k tomu mnohem větší tlak, a proto má
+            <strong>mnohem silnější svalovou stěnu</strong>
+            <a class="cite" href="#zdroj-2">[2]</a><a class="cite" href="#zdroj-9">[9]</a>.
+            Ve vizualizaci má proto levá komora tlustší obrys.
+          </p>
+        </article>
+
+        <!-- 3. Malý a velký oběh -->
+        <article id="obeh" class="card article">
+          <h3><span class="chapter-number">3</span> Malý a velký krevní oběh</h3>
+          <p>
+            Krev projde srdcem při jedné cestě tělem <strong>dvakrát</strong>. Proto
+            mluvíme o dvou obězích, které na sebe navazují <a class="cite" href="#zdroj-2">[2]</a>:
+          </p>
+          <div class="two-columns">
+            <div class="box box-blue">
+              <p class="box-title">Malý (plicní) oběh</p>
+              <p class="flow-steps">
+                pravá komora → plicní tepna → <strong>plíce</strong> → plicní žíly → levá síň
+              </p>
+              <p>V plicích krev odevzdá CO₂ (vydechneme ho) a nabere kyslík.</p>
+            </div>
+            <div class="box box-red">
+              <p class="box-title">Velký (tělní) oběh</p>
+              <p class="flow-steps">
+                levá komora → aorta → tepny → <strong>orgány a svaly</strong> → žíly → duté žíly → pravá síň
+              </p>
+              <p>V těle krev předá kyslík a živiny buňkám a odnese jejich odpad.</p>
+            </div>
+          </div>
+          <p>
+            V orgánech se tepny větví na stále tenčí cévy až na <strong>vlásečnice</strong>.
+            Jejich stěna je tak tenká, že jí kyslík a živiny projdou do buněk.
+          </p>
+
+          <h4>Tepna, nebo žíla?</h4>
+          <p>
+            <strong>Tepny vedou krev od srdce, žíly vedou krev k srdci</strong>
+            <a class="cite" href="#zdroj-2">[2]</a>. Rozhoduje <em>směr</em>, ne to, kolik
+            je v krvi kyslíku.
+          </p>
+          <div class="tip">
+            <p class="box-title">Pozor, chyták!</p>
+            <p>
+              <strong>Plicní tepna</strong> vede <strong>odkysličenou</strong> krev
+              (ze srdce do plic) a <strong>plicní žíly</strong> vedou
+              <strong>okysličenou</strong> krev (z plic do srdce)
+              <a class="cite" href="#zdroj-2">[2]</a>. Je to přesně naopak než ve velkém oběhu.
+            </p>
+          </div>
+          <p>
+            <strong>Modrá barva</strong> je jen domluva na obrázcích. Skutečná odkysličená
+            krev není modrá, ale <strong>tmavě červená</strong>. Žíly prosvítají kůží
+            namodrale kvůli tomu, jak kůže odráží a pohlcuje světlo
+            <a class="cite" href="#zdroj-11">[11]</a>.
+          </p>
+        </article>
+
+        <!-- 4. Srdeční cyklus -->
+        <article id="cyklus" class="card article">
+          <h3><span class="chapter-number">4</span> Srdeční cyklus: stah a odpočinek</h3>
+          <p>
+            Jeden úder srdce je jeden <strong>srdeční cyklus</strong>. Střídají se v něm
+            <strong>systola</strong> (stah) a <strong>diastola</strong> (uvolnění, kdy se srdce
+            plní krví) <a class="cite" href="#zdroj-10">[10]</a>. Ve vizualizaci ho dělíme
+            na tři fáze. Časy platí přibližně pro tep 75 za minutu, kdy jeden úder trvá
+            0,8 s <a class="cite" href="#zdroj-10">[10]</a>:
+          </p>
+          <ol class="steps">
+            <li><span><strong>Systola síní</strong> – síně se stáhnou a dotlačí krev do komor.</span> <code>≈ 0,1 s</code></li>
+            <li><span><strong>Systola komor</strong> – komory se stáhnou, cípaté chlopně se zavřou a krev vyteče do plicní tepny a aorty.</span> <code>≈ 0,3 s</code></li>
+            <li><span><strong>Diastola</strong> – srdce povolí, poloměsíčité chlopně se zavřou a dutiny se plní krví ze žil.</span> <code>≈ 0,4 s</code></li>
+          </ol>
+          <p>
+            Komory se plní hlavně <strong>samy</strong> během diastoly, krev do nich prostě
+            steče. Asi 70–80 % náplně se dostane do komor takhle a stah síní dodá
+            jen zbylých 20–30 % <a class="cite" href="#zdroj-10">[10]</a>.
+          </p>
+
+          <h4>Proč srdce dělá „lub-dub“?</h4>
+          <p>
+            Zvuk srdce nedělá sval, ale <strong>zavírající se chlopně</strong>
+            <a class="cite" href="#zdroj-3">[3]</a>:
+          </p>
+          <ul>
+            <li><strong>„lub“</strong> – na začátku systoly komor se zavřou cípaté chlopně,</li>
+            <li><strong>„dub“</strong> – na začátku diastoly se zavřou poloměsíčité chlopně.</li>
+          </ul>
+
+          <h4>Co se stane, když srdce zrychlí?</h4>
+          <p>
+            Když srdce bije rychleji, jeden úder trvá kratší dobu. Stah komor se ale
+            zkrátit moc nedá, takže se zkracuje hlavně <strong>diastola</strong>,
+            tedy čas na odpočinek a plnění. Vyzkoušejte to ve vizualizaci na časové ose
+            jednoho úderu.
+          </p>
+        </article>
+
+        <!-- 5. Kdo dává rytmus -->
+        <article id="vzruch" class="card article">
+          <h3><span class="chapter-number">5</span> Kdo srdci udává rytmus?</h3>
+          <p>
+            Srdce nepotřebuje, aby mu mozek před každým úderem posílal povel.
+            Každý úder začíná v malé skupince buněk v pravé síni, které se říká
+            <strong>sinusový uzel</strong> (SA uzel). Tyto buňky fungují jako
+            přirozený „kardiostimulátor“ a vyšlou <strong>elektrický signál</strong>
+            <a class="cite" href="#zdroj-3">[3]</a><a class="cite" href="#zdroj-5">[5]</a>.
+          </p>
+          <ol>
+            <li>Signál se rozběhne po síních, a ty se stáhnou.</li>
+            <li>Pak projde do komor, a stáhnou se komory <a class="cite" href="#zdroj-3">[3]</a>.</li>
+          </ol>
+          <p>
+            Tělo umí tempo zrychlit nebo zpomalit, třeba při běhu nebo ve spánku.
+            Elektrické signály srdce se dají zaznamenat přístrojem: tak vzniká
+            <strong>EKG</strong> (elektrokardiogram). K měření tepu se v projektu
+            dostaneme v další části modulu.
+          </p>
+        </article>
+
+        <!-- 6. Tep a minutový objem -->
+        <article id="tep" class="card article">
+          <h3><span class="chapter-number">6</span> Tep a minutový objem</h3>
+          <p>
+            <strong>Tep</strong> (srdeční frekvence) říká, kolikrát srdce udeří za minutu.
+            U dospělých je běžný klidový tep <strong>60 až 100 tepů za minutu</strong>,
+            když člověk v klidu sedí nebo leží. Trénovaní sportovci mívají klidový tep nižší
+            <a class="cite" href="#zdroj-4">[4]</a>.
+          </p>
+          <p>
+            Děti mají klidový tep <strong>vyšší</strong> a s věkem se postupně snižuje
+            <a class="cite" href="#zdroj-7">[7]</a>:
+          </p>
+          <table class="category-table">
+            <caption>Běžný klidový tep podle věku <a class="cite" href="#zdroj-7">[7]</a></caption>
+            <thead>
+              <tr><th scope="col">Věk</th><th scope="col">Tepů za minutu</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>1–3 roky</td><td>80–125</td></tr>
+              <tr><td>3–6 let</td><td>70–115</td></tr>
+              <tr><td>6–12 let</td><td>60–100</td></tr>
+              <tr><td>12–18 let</td><td>60–100</td></tr>
+            </tbody>
+          </table>
+
+          <h4>Jak si změřit tep</h4>
+          <ol>
+            <li>Přiložte ukazováček a prostředníček na zápěstí pod palcem nebo na krk vedle průdušnice.</li>
+            <li>Počítejte údery <strong>30 sekund</strong>.</li>
+            <li>Výsledek <strong>vynásobte dvěma</strong> a máte počet tepů za minutu
+              <a class="cite" href="#zdroj-3">[3]</a>.</li>
+          </ol>
+
+          <h4>Kolik krve srdce přečerpá?</h4>
+          <p>
+            Při jednom stahu vypudí levá komora dospělého v klidu asi
+            <strong>70 ml</strong> krve. Tomu se říká <strong>tepový objem</strong>
+            <a class="cite" href="#zdroj-9">[9]</a>. Kolik krve srdce přečerpá za minutu
+            (<strong>minutový objem</strong>), spočítáme takhle
+            <a class="cite" href="#zdroj-6">[6]</a>:
+          </p>
+          <div class="formula" role="img" aria-label="Minutový objem se rovná tep krát tepový objem">
+            <span>minutový objem = tep × tepový objem</span>
+          </div>
+          <h4>Příklad: 70 tepů za minutu</h4>
+          <ol class="steps">
+            <li><span>Vynásobíme tep a tepový objem</span> <code>70 × 70 ml = 4 900 ml</code></li>
+            <li><span>Převedeme mililitry na litry (1 l = 1 000 ml)</span> <code>4 900 ml = 4,9 l</code></li>
+            <li><span>Srdce přečerpá za minutu asi</span> <code>4,9 litru</code></li>
+          </ol>
+          <p>
+            To odpovídá údaji, že srdce dospělého v klidu přečerpá zhruba
+            5–6 litrů krve za minutu <a class="cite" href="#zdroj-6">[6]</a>.
+          </p>
+        </article>
+
+        <!-- 7. Omezení a zajímavosti -->
+        <article id="omezeni" class="card article">
+          <h3><span class="chapter-number">7</span> Co náš model zjednodušuje</h3>
+          <ul class="limits">
+            <li>
+              <p class="limit-title">Tepový objem je pořád 70 ml</p>
+              <p>
+                Ve skutečnosti se liší podle velikosti těla a trénovanosti. Při sportu se
+                srdce navíc stahuje silněji a vypudí víc krve, takže skutečný minutový
+                objem při běhu je vyšší, než ukazuje naše kalkulace.
+              </p>
+            </li>
+            <li>
+              <p class="limit-title">Délky fází počítáme jednoduchým pravidlem</p>
+              <p>
+                Stah síní = osmina úderu, stah komor = 0,3 s (nejvýš polovina úderu),
+                diastola = zbytek. Učebnice uvádí asi 0,1 s, 0,27 s a 0,43 s
+                <a class="cite" href="#zdroj-10">[10]</a>. Náš model čísla zaokrouhluje,
+                ale ukazuje to hlavní: při rychlém tepu se nejvíc zkracuje diastola.
+              </p>
+            </li>
+            <li>
+              <p class="limit-title">Obrázek je schéma</p>
+              <p>
+                Skutečné srdce je natočené, cévy se kříží a dutiny nemají tvar obdélníků.
+                Schéma ukazuje jen to, kudy teče krev.
+              </p>
+            </li>
+            <li>
+              <p class="limit-title">Rychlost teček krve není skutečná</p>
+              <p>
+                Tečky jen ukazují směr a to, že s rychlejším tepem krev obíhá rychleji.
+              </p>
+            </li>
+          </ul>
+
+          <h4>Zajímavosti</h4>
+          <div class="facts">
+            <div class="fact">
+              <p class="fact-number">100 000×</p>
+              <p>Tolikrát zhruba udeří srdce za jeden den <a class="cite" href="#zdroj-8">[8]</a>.</p>
+            </div>
+            <div class="fact">
+              <p class="fact-number">70–80 %</p>
+              <p>
+                Taková část krve doteče do komor sama, ještě než se stáhnou síně
+                <a class="cite" href="#zdroj-10">[10]</a>.
+              </p>
+            </div>
+            <div class="fact">
+              <p class="fact-number">1 pěst</p>
+              <p>Tak velké je zhruba srdce dospělého <a class="cite" href="#zdroj-9">[9]</a>.</p>
+            </div>
+            <div class="fact">
+              <p class="fact-number">0 modré krve</p>
+              <p>
+                Lidská krev je vždycky červená. Odkysličená je jen tmavší
+                <a class="cite" href="#zdroj-11">[11]</a>.
+              </p>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ============ SEKCE C: KVÍZ ============ -->
+    <section id="kviz" class="section" aria-labelledby="quiz-title">
+      <div class="container">
+        <h2 id="quiz-title">Kvíz: ověřte si, co víte</h2>
+        <p class="quiz-intro">
+          10 otázek o tom, jak je srdce postavené, kudy teče krev a jak srdce pracuje.
+          Po každé odpovědi uvidíte vysvětlení a odkaz na kapitolu teorie.
+        </p>
+
+        <!-- Otázky sem doplní quiz-page.js (otázky jsou v quiz-srdce.js) -->
+        <ol id="quiz-list" class="quiz-list"></ol>
+
+        <div id="quiz-result" class="card quiz-result" hidden>
+          <h3 id="quiz-result-title" tabindex="-1">Výsledek: <span id="quiz-score"></span></h3>
+          <p id="quiz-score-text"></p>
+          <button type="button" id="quiz-restart" class="button quiz-restart">Zkusit znovu</button>
+        </div>
+
+        <noscript>
+          <p class="card">Kvíz potřebuje zapnutý JavaScript.</p>
+        </noscript>
+      </div>
+    </section>
+
+    <!-- ============ ZDROJE ============ -->
+    <section id="zdroje" class="section section-alt" aria-labelledby="sources-title">
+      <div class="container">
+        <h2 id="sources-title">Zdroje</h2>
+        <p class="small">Odkazy byly zkontrolovány 22. 11. 2026. Čísla v hranatých závorkách v textu odkazují na tento seznam.</p>
+
+        <h3 class="sources-group">Zdravotnické organizace</h3>
+        <ol class="sources">
+          <li id="zdroj-1">
+            National Heart, Lung, and Blood Institute (NHLBI): <a href="https://www.nhlbi.nih.gov/health/heart/anatomy" target="_blank" rel="noopener">How the Heart Works – Heart Anatomy</a>.
+            <span class="source-note">Čtyři dutiny srdce: dvě síně a dvě komory.</span>
+          </li>
+          <li id="zdroj-2">
+            NHLBI: <a href="https://www.nhlbi.nih.gov/health/heart/blood-flow" target="_blank" rel="noopener">How Blood Flows through the Heart</a>.
+            <span class="source-note">Čtyři chlopně, cesta krve srdcem, tepny vedou krev od srdce a žíly k srdci, plicní tepna vede odkysličenou krev, levá komora pumpuje krev do celého těla.</span>
+          </li>
+          <li id="zdroj-3">
+            NHLBI: <a href="https://www.nhlbi.nih.gov/health/heart/heart-beats" target="_blank" rel="noopener">How the Heart Beats</a>.
+            <span class="source-note">Sinusový (SA) uzel, šíření elektrického signálu, zvuk „lub-dub“ a měření tepu (30 s × 2).</span>
+          </li>
+          <li id="zdroj-4">
+            American Heart Association: <a href="https://www.heart.org/en/health-topics/high-blood-pressure/the-facts-about-high-blood-pressure/all-about-heart-rate-pulse" target="_blank" rel="noopener">All About Heart Rate (Pulse)</a>.
+            <span class="source-note">Běžný klidový tep dospělých 60–100 tepů za minutu, nižší tep u sportovců.</span>
+          </li>
+          <li id="zdroj-5">
+            Cleveland Clinic: <a href="https://my.clevelandclinic.org/health/articles/21704-heart" target="_blank" rel="noopener">Heart</a>.
+            <span class="source-note">Velikost srdce, sinusový uzel jako zdroj signálu pro úder.</span>
+          </li>
+          <li id="zdroj-6">
+            Cleveland Clinic: <a href="https://my.clevelandclinic.org/health/diagnostics/23344-cardiac-output" target="_blank" rel="noopener">Cardiac Output</a>.
+            <span class="source-note">Minutový objem = tepový objem × tep, v klidu asi 5–6 litrů za minutu.</span>
+          </li>
+          <li id="zdroj-7">
+            Cleveland Clinic: <a href="https://health.clevelandclinic.org/pediatric-vital-signs/" target="_blank" rel="noopener">What You Need to Know About Infant and Children's Vital Signs</a>.
+            <span class="source-note">Tabulka běžného tepu dětí podle věku.</span>
+          </li>
+          <li id="zdroj-8">
+            Cleveland Clinic: <a href="https://health.clevelandclinic.org/facts-about-the-heart" target="_blank" rel="noopener">30 Facts About Your Heart</a>.
+            <span class="source-note">Srdce udeří asi 100 000krát za den.</span>
+          </li>
+        </ol>
+
+        <h3 class="sources-group">Učebnice</h3>
+        <ol class="sources" start="9">
+          <li id="zdroj-9">
+            OpenStax: <a href="https://openstax.org/books/anatomy-and-physiology-2e/pages/19-1-heart-anatomy" target="_blank" rel="noopener">Anatomy and Physiology 2e, kapitola 19.1 Heart Anatomy</a>.
+            <span class="source-note">Velikost a hmotnost srdce, mnohem silnější stěna levé komory, asi 70 ml krve při jednom stahu.</span>
+          </li>
+          <li id="zdroj-10">
+            OpenStax: <a href="https://openstax.org/books/anatomy-and-physiology-2e/pages/19-3-cardiac-cycle" target="_blank" rel="noopener">Anatomy and Physiology 2e, kapitola 19.3 Cardiac Cycle</a>.
+            <span class="source-note">Systola a diastola, délky fází (asi 100 ms, 270 ms a 430 ms), 70–80 % plnění komor bez stahu síní.</span>
+          </li>
+        </ol>
+
+        <h3 class="sources-group">Populárně-naučné články</h3>
+        <ol class="sources" start="11">
+          <li id="zdroj-11">
+            Live Science: <a href="https://www.livescience.com/why-veins-blue-arteries-red" target="_blank" rel="noopener">If blood is red, why do veins look bluish?</a>
+            <span class="source-note">Odkysličená krev je tmavě červená, žíly vypadají modře kvůli tomu, jak kůže propouští světlo.</span>
+          </li>
+        </ol>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p><strong>Health &amp; Fitness Explorer</strong> · modul Srdce a oběh · ročníkový projekt · Vojta, Scio škola · 2026</p>
+      <p class="small">Aplikace slouží ke vzdělávání a nenahrazuje radu lékaře.</p>
+    </div>
+  </footer>
+
+  <!-- Nejdřív výpočty, potom práce se stránkou -->
+  <script src="srdce.js"></script>
+  <script src="srdce-page.js"></script>
+  <script src="quiz.js"></script>
+  <script src="quiz-srdce.js"></script>
+  <script src="quiz-page.js"></script>
+</body>
+</html>

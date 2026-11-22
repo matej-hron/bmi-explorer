@@ -22,6 +22,13 @@
   --correct-soft: #eaf6ef;
   --wrong-soft: #fdecea;
 
+  /* barvy krve a srdečního svalu (modul Srdce a oběh) */
+  --blood-red: #d23f3f;
+  --blood-blue: #3f63c8;
+  --muscle: #7a2531;
+  --red-soft: #fdecec;
+  --blue-soft: #e9eefc;
+
   /* barvy kategorií BMI */
   --c-underweight: #5b9bd5;
   --c-normal: #3da66a;
@@ -43,7 +50,7 @@
 
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: 80px; /* aby nadpis nezajela pod lepící hlavičku */
+  scroll-padding-top: 120px; /* aby nadpis nezajel pod lepící hlavičku (má dva řádky) */
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -156,17 +163,56 @@ code {
   color: var(--accent);
 }
 
-.main-nav {
+/* Přepínač modulů (BMI | Srdce a oběh) – stejný na všech stránkách */
+.module-nav {
   display: flex;
   gap: 4px;
   list-style: none;
   margin: 0;
-  padding: 0;
+  padding: 4px;
+  background: var(--bg-alt);
+  border-radius: 999px;
+}
+
+.module-nav a {
+  display: block;
+  padding: 6px 14px;
+  border-radius: 999px;
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.92rem;
+  white-space: nowrap;
+}
+
+.module-nav a:hover {
+  color: var(--accent-dark);
+  background: var(--surface);
+}
+
+/* Aktivní modul (stránka, na které právě jsme) */
+.module-nav a[aria-current="page"] {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* Druhý řádek hlavičky: odkazy na části aktuální stránky */
+.header-sections {
+  border-top: 1px solid var(--border);
+}
+
+.main-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  list-style: none;
+  margin: 0;
+  padding: 2px 0;
 }
 
 .main-nav a {
   display: block;
-  padding: 8px 10px;
+  padding: 6px 10px;
   border-radius: 8px;
   color: var(--text);
   text-decoration: none;
@@ -1056,8 +1102,13 @@ code {
   }
 
   .main-nav a {
-    padding: 8px 5px;
+    padding: 6px 6px;
     font-size: 0.88rem;
+  }
+
+  .module-nav a {
+    padding: 5px 10px;
+    font-size: 0.85rem;
   }
 
   .result-value {
@@ -1065,12 +1116,474 @@ code {
   }
 }
 
-/* Velmi úzké telefony: navigace se zalomí pod logo, aby nepřetékala. */
-@media (max-width: 359px) {
+/* Úzké telefony: přepínač modulů se zalomí pod logo, aby nepřetékal.
+   Hlavička je pak vysoká, proto na telefonu nezůstává přilepená nahoře
+   (jinak by zabírala velký kus obrazovky). */
+@media (max-width: 559px) {
+  html {
+    scroll-padding-top: 16px;
+  }
+
+  .site-header {
+    position: static;
+  }
+
   .header-inner {
     flex-wrap: wrap;
     justify-content: center;
-    gap: 0;
-    padding-top: 6px;
+    gap: 4px;
+    padding: 6px 16px;
+  }
+}
+
+/* ---------- Pomocné ---------- */
+
+/* Text, který vidí jen čtečka obrazovky (pro nevidomé), ne oko. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* =========================================================
+   MODUL SRDCE A KREVNÍ OBĚH (srdce.html)
+   ========================================================= */
+
+.section-intro {
+  color: var(--muted);
+  max-width: 70ch;
+}
+
+/* Dva obrázky vedle sebe (na úzké obrazovce pod sebou) */
+.heart-explorer {
+  display: grid;
+  gap: 16px;
+}
+
+@media (min-width: 860px) {
+  .heart-explorer {
+    grid-template-columns: 4fr 3fr;
+    align-items: start;
+  }
+}
+
+.heart-figure {
+  margin: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.heart-figure svg {
+  max-width: 440px;
+}
+
+/* --- Kreslení srdce a oběhu --- */
+
+.blood-red {
+  fill: var(--blood-red);
+}
+
+.blood-blue {
+  fill: var(--blood-blue);
+}
+
+.chamber rect {
+  stroke: var(--muscle);
+  stroke-width: 5;
+}
+
+/* Levá komora má silnější svalovou stěnu */
+.chamber rect.wall-thick {
+  stroke-width: 11;
+}
+
+.vessel {
+  stroke: var(--muscle);
+  stroke-width: 2;
+  opacity: 0.85;
+}
+
+.vessel-red {
+  fill: var(--blood-red);
+}
+
+.vessel-blue {
+  fill: var(--blood-blue);
+}
+
+.chamber-label,
+.organ-label,
+.vessel-label,
+.loop-label {
+  font-family: var(--font);
+  text-anchor: middle;
+}
+
+/* Popisky zarovnané doleva (ne na střed) */
+.heart-figure text.anchor-start {
+  text-anchor: start;
+}
+
+/* Popisky zarovnané doprava */
+.heart-figure text.anchor-end {
+  text-anchor: end;
+}
+
+.chamber-label {
+  fill: #fff;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.vessel-label {
+  fill: var(--muted);
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.organ-label {
+  fill: var(--text);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.organ-label-light {
+  fill: #fff;
+  font-size: 12px;
+}
+
+.loop-label {
+  fill: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Chlopně: zavřené jsou vodorovně, otevřené se otočí o úhel --open */
+.leaflet {
+  stroke: #f4d35e;
+  stroke-width: 5;
+  stroke-linecap: round;
+  transform-box: view-box;
+  transition: transform 0.12s ease-out;
+}
+
+/* Cípaté chlopně jsou otevřené při stahu síní a v diastole,
+   poloměsíčité jen při stahu komor. */
+.heart-svg[data-phase="atria"] .valve-av .leaflet,
+.heart-svg[data-phase="diastole"] .valve-av .leaflet,
+.heart-svg[data-phase="ventricles"] .valve-semilunar .leaflet {
+  transform: rotate(var(--open));
+}
+
+/* Šipky toku krve: ukážeme jen ty, které patří k aktuální fázi */
+.flow {
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.heart-svg[data-phase="atria"] .flow-av,
+.heart-svg[data-phase="diastole"] .flow-av,
+.heart-svg[data-phase="diastole"] .flow-veins,
+.heart-svg[data-phase="ventricles"] .flow-out {
+  opacity: 1;
+}
+
+.arrow {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-dasharray: 10 8;
+  marker-end: url(#arrowhead);
+}
+
+/* Schéma oběhu */
+.organ {
+  stroke: var(--border);
+  stroke-width: 2;
+}
+
+.organ-lungs {
+  fill: #f6dede;
+}
+
+.organ-body {
+  fill: #f3e7da;
+}
+
+.loop {
+  fill: none;
+  stroke-width: 12;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.35;
+}
+
+.loop-red {
+  stroke: var(--blood-red);
+}
+
+.loop-blue {
+  stroke: var(--blood-blue);
+}
+
+.loop-track {
+  fill: none;
+  stroke: none;
+}
+
+.blood-dot {
+  stroke: #fff;
+  stroke-width: 2;
+}
+
+.dot-red {
+  fill: var(--blood-red);
+}
+
+.dot-blue {
+  fill: var(--blood-blue);
+}
+
+/* Vysvětlivky pod obrázky */
+.heart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 20px;
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 20px;
+  font-size: 0.92rem;
+  color: var(--muted);
+}
+
+.swatch-red {
+  background: var(--blood-red);
+}
+
+.swatch-blue {
+  background: var(--blood-blue);
+}
+
+.legend-arrow {
+  font-weight: 800;
+  color: var(--text);
+  margin-right: 4px;
+}
+
+/* --- Panel s fází, časovou osou a ovládáním --- */
+
+.heart-panel {
+  display: grid;
+  gap: 20px;
+}
+
+.phase-name {
+  font-size: 1.3rem;
+  margin-bottom: 0.3em;
+}
+
+.phase-text {
+  margin: 0;
+  min-height: 3.2em; /* aby text při změně fáze neposkakoval */
+}
+
+.timeline-title {
+  margin-bottom: 8px;
+}
+
+.timeline-bar {
+  position: relative;
+  display: flex;
+  height: 34px;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.timeline-segment {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  white-space: nowrap;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #fff;
+  min-width: 0;
+  flex-shrink: 0;
+  transition: width 0.2s;
+}
+
+.seg-atria {
+  background: #b8577a;
+}
+
+.seg-ventricles {
+  background: var(--muscle);
+}
+
+.seg-diastole {
+  background: #7d8bb0;
+}
+
+.timeline-marker {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  margin-left: -2px;
+  background: var(--text);
+  box-shadow: 0 0 0 2px #fff;
+}
+
+.heart-controls {
+  display: grid;
+  gap: 14px;
+}
+
+.bpm-control {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+
+.bpm-control label {
+  font-weight: 700;
+}
+
+.bpm-control input[type="range"] {
+  flex: 1 1 220px;
+  accent-color: var(--blood-red);
+}
+
+.bpm-value {
+  font-size: 1.6rem;
+  font-weight: 800;
+  min-width: 3ch;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.unit-text {
+  color: var(--muted);
+}
+
+.presets,
+.play-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.button.preset,
+.button.button-secondary {
+  width: auto;
+  font-size: 0.95rem;
+  padding: 8px 14px;
+}
+
+.button.preset {
+  background: var(--accent-soft);
+  color: var(--accent-dark);
+}
+
+.button.preset:hover {
+  background: #d7defa;
+}
+
+.button.preset[aria-pressed="true"] {
+  background: var(--accent);
+  color: #fff;
+}
+
+.button.button-secondary {
+  background: var(--surface);
+  color: var(--accent-dark);
+  border: 2px solid var(--accent);
+}
+
+.button.button-secondary:hover {
+  background: var(--accent-soft);
+}
+
+.heart-stats {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+}
+
+@media (min-width: 640px) {
+  .heart-stats {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.heart-stats div {
+  background: var(--bg);
+  border-radius: 12px;
+  padding: 12px 16px;
+}
+
+.heart-stats dt {
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+
+.heart-stats dd {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--blood-red);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Teorie --- */
+
+.box-red {
+  background: var(--red-soft);
+}
+
+.box-blue {
+  background: var(--blue-soft);
+}
+
+.flow-steps {
+  font-weight: 600;
+}
+
+/* Kdo má v systému vypnuté animace, nebude mít ani plynulé přechody. */
+@media (prefers-reduced-motion: reduce) {
+  .leaflet,
+  .flow,
+  .timeline-segment {
+    transition: none;
+  }
+}
+
+/* Na telefonu je obrázek srdce malý, proto zvětšíme popisky a zmenšíme okraje. */
+@media (max-width: 559px) {
+  .heart-figure {
+    padding: 8px;
+  }
+
+  .vessel-label {
+    font-size: 13px;
+  }
+
+  .chamber-label {
+    font-size: 16px;
+  }
+
+  .organ-label,
+  .loop-label {
+    font-size: 14px;
   }
 }

@@ -13,16 +13,28 @@ const vm = require("node:vm");
 const root = path.join(__dirname, "..");
 const read = (file) => fs.readFileSync(path.join(root, file), "utf8");
 
-// Načteme quiz.js i bmi.js do jednoho "pískoviště", ať můžeme
-// porovnat početní otázku se skutečným výpočtem z kalkulačky.
+// Každá stránka má svůj kvíz: pravidla (quiz.js) jsou společná,
+// otázky a výpočty jsou pro každý modul jiné. Pro každý modul proto
+// načteme soubory do vlastního "pískoviště" – stejně jako na stránce.
+// Výpočty (bmi.js, srdce.js) přidáváme, ať můžeme porovnat početní
+// otázku se skutečným výpočtem.
+const ENGINE = "shuffle, prepareQuiz, isCorrect, getCorrectOption, countCorrect, getScoreMessage";
+
 const quiz = vm.runInNewContext(
-  read("bmi.js") +
-    "\n" +
-    read("quiz.js") +
-    "\n({ QUIZ_QUESTIONS, shuffle, prepareQuiz, isCorrect, getCorrectOption," +
-    " countCorrect, getScoreMessage, calculateBmi, roundToOneDecimal })"
+  [read("bmi.js"), read("quiz.js"), read("quiz-bmi.js")].join("\n") +
+    `\n({ QUIZ_QUESTIONS, ${ENGINE}, calculateBmi, roundToOneDecimal })`
+);
+const heartQuiz = vm.runInNewContext(
+  [read("srdce.js"), read("quiz.js"), read("quiz-srdce.js")].join("\n") +
+    `\n({ QUIZ_QUESTIONS, ${ENGINE}, getCardiacOutput, getPhaseDurations, formatNumber })`
 );
 const questions = quiz.QUIZ_QUESTIONS;
+
+// Sady otázek: pro každou stránku jedna.
+const QUESTION_SETS = [
+  { name: "BMI", page: "index.html", questions: quiz.QUIZ_QUESTIONS },
+  { name: "Srdce", page: "srdce.html", questions: heartQuiz.QUIZ_QUESTIONS },
+];
 
 // Jednoduchý "náhodný" generátor, který dává pokaždé stejná čísla.
 function fakeRandom(seed) {
@@ -33,35 +45,45 @@ function fakeRandom(seed) {
   };
 }
 
-test("kvíz má 10 otázek a každá má jiné id", () => {
-  assert.equal(questions.length, 10);
-  const ids = new Set(questions.map((q) => q.id));
-  assert.equal(ids.size, questions.length);
-});
+for (const set of QUESTION_SETS) {
+  const questions = set.questions;
 
-test("každá otázka má 4 různé možnosti a právě jedna je správná", () => {
-  for (const q of questions) {
-    assert.equal(q.options.length, 4, q.id);
-    const optionIds = q.options.map((o) => o.id);
-    assert.equal(new Set(optionIds).size, 4, q.id);
-    assert.equal(new Set(q.options.map((o) => o.text)).size, 4, q.id);
-    assert.equal(optionIds.filter((id) => id === q.correct).length, 1, q.id);
-    assert.ok(q.explanation.length > 20, q.id);
-  }
-});
+  test(`${set.name}: kvíz má 10 otázek a každá má jiné id`, () => {
+    assert.equal(questions.length, 10);
+    const ids = new Set(questions.map((q) => q.id));
+    assert.equal(ids.size, questions.length);
+  });
 
-test("odkazy na kapitoly vedou na existující kapitolu teorie", () => {
-  const html = read("index.html");
-  for (const q of questions) {
-    assert.ok(html.includes(`id="${q.chapter.id}"`), `${q.id} → #${q.chapter.id}`);
-  }
-});
+  test(`${set.name}: každá otázka má 4 různé možnosti a právě jedna je správná`, () => {
+    for (const q of questions) {
+      assert.equal(q.options.length, 4, q.id);
+      const optionIds = q.options.map((o) => o.id);
+      assert.equal(new Set(optionIds).size, 4, q.id);
+      assert.equal(new Set(q.options.map((o) => o.text)).size, 4, q.id);
+      assert.equal(optionIds.filter((id) => id === q.correct).length, 1, q.id);
+      assert.ok(q.explanation.length > 20, q.id);
+    }
+  });
+
+  test(`${set.name}: odkazy na kapitoly vedou na existující kapitolu teorie`, () => {
+    const html = read(set.page);
+    for (const q of questions) {
+      assert.ok(html.includes(`id="${q.chapter.id}"`), `${q.id} → #${q.chapter.id}`);
+    }
+  });
+}
 
 test("početní otázka souhlasí s kalkulačkou (70 kg, 175 cm)", () => {
   const q = questions.find((x) => x.id === "calculation");
   const bmi = quiz.roundToOneDecimal(quiz.calculateBmi(70, 175));
   const expected = bmi.toFixed(1).replace(".", ",");
   assert.equal(quiz.getCorrectOption(q).text, expected);
+});
+
+test("srdce: početní otázka souhlasí s výpočtem minutového objemu (70 tepů × 70 ml)", () => {
+  const q = heartQuiz.QUIZ_QUESTIONS.find((x) => x.id === "cardiac-output");
+  const liters = heartQuiz.formatNumber(heartQuiz.getCardiacOutput(70), 1);
+  assert.equal(heartQuiz.getCorrectOption(q).text, `${liters} litru`);
 });
 
 test("shuffle vrátí stejné prvky v jiném poli a původní pole nezmění", () => {
