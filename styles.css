@@ -1193,28 +1193,64 @@ code {
   fill: var(--blood-blue);
 }
 
-.chamber rect {
+/* Srdeční sval: obrys srdce s leskem (gradient je v SVG v <defs>) */
+.heart-muscle {
+  fill: url(#muscle-shine);
   stroke: var(--muscle);
-  stroke-width: 5;
+  stroke-width: 3;
 }
 
-/* Levá komora má silnější svalovou stěnu */
-.chamber rect.wall-thick {
-  stroke-width: 11;
-}
-
-.vessel {
-  stroke: var(--muscle);
+/* Dutiny: tenký světlý okraj, ať jsou vidět na tmavém svalu */
+.chamber path {
+  stroke: rgba(255, 255, 255, 0.35);
   stroke-width: 2;
-  opacity: 0.85;
 }
 
-.vessel-red {
-  fill: var(--blood-red);
+/* Cévy: široká tmavá čára = stěna, užší barevná = krev uvnitř */
+.vessel-wall,
+.vessel-blood {
+  fill: none;
+  stroke-linecap: butt;
+  stroke-linejoin: round;
 }
 
-.vessel-blue {
-  fill: var(--blood-blue);
+.vessel-wall {
+  stroke: var(--muscle);
+  stroke-width: 34;
+}
+
+.vessel-blood {
+  stroke-width: 27;
+}
+
+.vessel-wall.branch {
+  stroke-width: 15;
+}
+
+.vessel-blood.branch {
+  stroke-width: 10;
+}
+
+.vessel-wall.vein-small {
+  stroke-width: 20;
+}
+
+.vessel-blood.vein-small {
+  stroke-width: 14;
+}
+
+.vessel-blood.vessel-red {
+  stroke: var(--blood-red);
+}
+
+.vessel-blood.vessel-blue {
+  stroke: var(--blood-blue);
+}
+
+.label-line {
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 1.5;
 }
 
 .chamber-label,
@@ -1303,26 +1339,38 @@ code {
   marker-end: url(#arrowhead);
 }
 
-/* Schéma oběhu */
-.organ {
-  stroke: var(--border);
+/* Schéma oběhu: postava člověka */
+.body-shape {
+  fill: #f3e7da;
+  stroke: #d9c3ab;
   stroke-width: 2;
 }
 
-.organ-lungs {
-  fill: #f6dede;
+.organ {
+  stroke: #d99a9a;
+  stroke-width: 1.5;
 }
 
-.organ-body {
-  fill: #f3e7da;
+.organ-lungs {
+  fill: #f6c9c9;
+}
+
+.heart-half {
+  stroke: var(--muscle);
+  stroke-width: 2;
 }
 
 .loop {
   fill: none;
-  stroke-width: 12;
+  stroke-width: 5;
   stroke-linecap: round;
   stroke-linejoin: round;
-  opacity: 0.35;
+}
+
+/* Široká průsvitná kopie cévy pod ní – "záře", přidává ji srdce-page.js */
+.loop-glow {
+  stroke-width: 13;
+  opacity: 0.22;
 }
 
 .loop-red {
@@ -1333,14 +1381,27 @@ code {
   stroke: var(--blood-blue);
 }
 
-.loop-track {
-  fill: none;
-  stroke: none;
+/* Zvýraznění jednoho oběhu: ten druhý ztlumíme */
+.circuit {
+  transition: opacity 0.2s;
+}
+
+.circulation-svg[data-show="small"] .circuit-large,
+.circulation-svg[data-show="large"] .circuit-small {
+  opacity: 0.12;
+}
+
+.circuit-toggle {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
 .blood-dot {
   stroke: #fff;
-  stroke-width: 2;
+  stroke-width: 1.5;
 }
 
 .dot-red {
@@ -1431,6 +1492,15 @@ code {
 
 .seg-diastole {
   background: #7d8bb0;
+}
+
+/* Úsek fáze, která právě běží: ostatní trochu ztlumíme */
+.timeline-bar .timeline-segment {
+  opacity: 0.55;
+}
+
+.timeline-bar .timeline-segment.is-active {
+  opacity: 1;
 }
 
 .timeline-marker {
@@ -1561,6 +1631,7 @@ code {
 
 /* Kdo má v systému vypnuté animace, nebude mít ani plynulé přechody. */
 @media (prefers-reduced-motion: reduce) {
+  .circuit,
   .leaflet,
   .flow,
   .timeline-segment {
@@ -1580,6 +1651,11 @@ code {
 
   .chamber-label {
     font-size: 16px;
+  }
+
+  .circuit-toggle .button {
+    padding: 6px 10px;
+    font-size: 0.82rem;
   }
 
   .organ-label,

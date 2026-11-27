@@ -35,20 +35,27 @@ const phaseAnnounce = document.getElementById("phase-announce");
 
 const cycleDurationText = document.getElementById("cycle-duration");
 const timelineMarker = document.getElementById("timeline-marker");
+const timelineSegments = {};
+for (const phase of PHASES) {
+  timelineSegments[phase.id] = document.getElementById(`timeline-${phase.id}`);
+}
 
-const dotsGroup = document.getElementById("blood-dots");
+const circulationSvg = document.getElementById("circulation-svg");
+const circuitToggle = document.getElementById("circuit-toggle");
 
 // ---------- Nastavení animace ----------
 
 // O kolik se dutina při stahu zmenší (0,12 = o 12 %).
 const SQUEEZE = 0.12;
 
-// Za kolik úderů oběhne tečka krve jednu smyčku. Není to skutečný čas,
-// jen aby byl pohyb dobře vidět.
-const BEATS_PER_LAP = 6;
+// O kolik bodů obrázku se tečky krve posunou za jeden úder srdce.
+// Není to skutečná rychlost krve, jen aby byl pohyb dobře vidět.
+// Všechny tečky jedou stejně rychle, takže krátkou cestu do plic
+// oběhnou dřív než dlouhou cestu do nohou.
+const DISTANCE_PER_BEAT = 40;
 
-// Kolik teček krve je na každé smyčce.
-const DOTS_PER_LOOP = 6;
+// Jak daleko od sebe jsou tečky krve na cévě (v bodech obrázku).
+const DOT_SPACING = 45;
 
 // Uživatel si v systému vypnul animace? Pak se animace nespustí sama.
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -57,7 +64,7 @@ const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matc
 
 let bpm = PRESETS.find((p) => p.id === "rest").bpm;
 let timeInCycle = 0; // sekundy od začátku aktuálního úderu
-let lapProgress = 0; // jak daleko jsou tečky krve na smyčce (0 až 1)
+let bloodDistance = 0; // kolik bodů obrázku už tečky krve ujely
 let playing = !reducedMotion;
 let lastFrameTime = null;
 let shownPhaseId = null;
@@ -99,25 +106,65 @@ function squeezeAt(progress, strength) {
   return 1 - strength * Math.sin(Math.PI * progress);
 }
 
-// Tečky krve: na každé smyčce několik teček rozmístěných rovnoměrně.
-//   first / second = barva v první a druhé polovině smyčky
-//   (malý oběh: do plic modrá, z plic červená; velký naopak).
+// Okruhy krve v obrázku oběhu. Každý okruh (g.circuit v srdce.html) má
+// tepnu (data-part="out", krev teče ze srdce) a žílu (data-part="back",
+// krev teče zpátky do srdce). Tečka jede nejdřív po tepně, pak po žíle.
 const SVG_NS = "http://www.w3.org/2000/svg";
-const loops = [
-  { path: document.getElementById("loop-small"), first: "dot-blue", second: "dot-red" },
-  { path: document.getElementById("loop-large"), first: "dot-red", second: "dot-blue" },
-];
-const dots = [];
-for (const loop of loops) {
-  const length = loop.path.getTotalLength();
-  for (let i = 0; i < DOTS_PER_LOOP; i++) {
+const circuits = [];
+for (const group of circulationSvg.querySelectorAll(".circuit")) {
+  const parts = ["out", "back"].map((name) => {
+    const path = group.querySelector(`[data-part="${name}"]`);
+
+    // Pod každou cévu dáme její širokou průsvitnou kopii – "záři",
+    // aby byly oběhy dobře vidět.
+    const glow = path.cloneNode();
+    glow.removeAttribute("data-part");
+    glow.classList.add("loop-glow");
+    group.insertBefore(glow, path);
+
+    return {
+      path,
+      length: path.getTotalLength(),
+      color: path.classList.contains("loop-red") ? "dot-red" : "dot-blue",
+    };
+  });
+  const length = parts[0].length + parts[1].length;
+
+  // Na delší okruh přijde víc teček, aby byly všude stejně husté.
+  const count = Math.max(2, Math.round(length / DOT_SPACING));
+  const dots = [];
+  for (let i = 0; i < count; i++) {
     const circle = document.createElementNS(SVG_NS, "circle");
-    circle.setAttribute("r", "6");
+    circle.setAttribute("r", "4.5");
     circle.classList.add("blood-dot");
-    dotsGroup.append(circle);
-    dots.push({ circle, loop, length, offset: i / DOTS_PER_LOOP });
+    group.append(circle);
+    dots.push({ circle, offset: i / count });
   }
+  circuits.push({ parts, length, dots });
 }
+
+/**
+ * Kde je tečka krve a jakou má barvu.
+ * position = 0 až 1: jak daleko je tečka na svém okruhu.
+ */
+function getDotPlace(circuit, position) {
+  let distance = position * circuit.length;
+  const [out, back] = circuit.parts;
+  const part = distance < out.length ? out : back;
+  if (part === back) distance -= out.length;
+  return { point: part.path.getPointAtLength(distance), color: part.color };
+}
+
+// Tlačítka nad obrázkem oběhu: zvýraznit oba oběhy, jen malý, nebo jen velký.
+// Ten druhý CSS ztlumí podle atributu data-show (viz styles.css).
+circuitToggle.addEventListener("click", (event) => {
+  const button = event.target.closest("button");
+  if (!button) return;
+  circulationSvg.dataset.show = button.dataset.show;
+  for (const other of circuitToggle.querySelectorAll("button")) {
+    other.setAttribute("aria-pressed", String(other === button));
+  }
+});
 
 // Tlačítka předvoleb (Spánek, Klid, Chůze, Běh) podle PRESETS ze srdce.js.
 const presetButtons = PRESETS.map((preset) => {
@@ -131,6 +178,30 @@ const presetButtons = PRESETS.map((preset) => {
 });
 
 // ---------- Vykreslení ----------
+
+/**
+ * Popis fáze pod obrázky.
+ *
+ * Když animace běží, fáze se střídají i několikrát za sekundu – text by
+ * jen blikal a nedal se přečíst (a na telefonu by celý panel poskakoval).
+ * Proto při přehrávání ukážeme jednu stálou nápovědu a popis fáze
+ * až tehdy, když animaci pozastavíme nebo stiskneme Krok.
+ */
+function showPhaseText(phase) {
+  const key = playing ? "playing" : phase.id;
+  if (key === shownPhaseId) return; // text se nezměnil, nic nepřepisujeme
+  shownPhaseId = key;
+
+  if (playing) {
+    phaseName.textContent = "Srdce bije…";
+    phaseText.textContent =
+      "Ve které fázi srdce právě je, ukazuje barevná osa níže. " +
+      "Popis fáze se objeví, když animaci pozastavíte nebo stisknete Krok.";
+  } else {
+    phaseName.textContent = phase.name;
+    phaseText.textContent = phase.text;
+  }
+}
 
 /**
  * Nakreslí aktuální stav: dutiny, chlopně, tečky krve, popis fáze a časovou osu.
@@ -149,27 +220,29 @@ function draw() {
   // Srdce ve schématu oběhu "pulzuje" se stahem komor.
   setScale(circulationHeart, phase.id === "ventricles" ? squeezeAt(progress, SQUEEZE / 2) : 1);
 
-  // Popis fáze měníme jen tehdy, když začne jiná fáze.
-  if (phase.id !== shownPhaseId) {
-    phaseName.textContent = phase.name;
-    phaseText.textContent = phase.text;
-    shownPhaseId = phase.id;
+  showPhaseText(phase);
+
+  // Na časové ose zvýrazníme úsek fáze, která právě běží.
+  for (const p of PHASES) {
+    timelineSegments[p.id].classList.toggle("is-active", p.id === phase.id);
   }
 
   // Značka na časové ose: kolik procent úderu už uběhlo.
   const percent = (timeInCycle / getCycleDuration(bpm)) * 100;
   timelineMarker.style.left = `${percent}%`;
 
-  // Tečky krve: každá je o kousek dál po své smyčce.
-  for (const dot of dots) {
-    const position = (lapProgress + dot.offset) % 1; // 0 až 1 po smyčce
-    const point = dot.loop.path.getPointAtLength(position * dot.length);
-    dot.circle.setAttribute("cx", point.x);
-    dot.circle.setAttribute("cy", point.y);
-    // V plicích (resp. v těle) – v polovině smyčky – krev změní barvu.
-    const inFirstHalf = position < 0.5;
-    dot.circle.classList.toggle(dot.loop.first, inFirstHalf);
-    dot.circle.classList.toggle(dot.loop.second, !inFirstHalf);
+  // Tečky krve: každá je o kousek dál po svém okruhu.
+  for (const circuit of circuits) {
+    // Jak daleko je okruh "ujetý" (0 až 1). Krátký okruh se oběhne rychleji.
+    const lap = bloodDistance / circuit.length;
+    for (const dot of circuit.dots) {
+      const { point, color } = getDotPlace(circuit, (lap + dot.offset) % 1);
+      dot.circle.setAttribute("cx", point.x);
+      dot.circle.setAttribute("cy", point.y);
+      // Na tepně a na žíle má krev jinou barvu (v plicích zčervená, v těle zmodrá).
+      dot.circle.classList.toggle("dot-red", color === "dot-red");
+      dot.circle.classList.toggle("dot-blue", color === "dot-blue");
+    }
   }
 }
 
@@ -192,7 +265,7 @@ function showNumbers() {
   const cycle = getCycleDuration(bpm);
   for (const phase of PHASES) {
     const percent = (durations[phase.id] / cycle) * 100;
-    document.getElementById(`timeline-${phase.id}`).style.width = `${percent}%`;
+    timelineSegments[phase.id].style.width = `${percent}%`;
   }
 
   // Zvýrazníme předvolbu, která odpovídá aktuálnímu tepu.
@@ -224,7 +297,7 @@ function setBpm(value) {
  */
 function advance(seconds) {
   timeInCycle = (timeInCycle + seconds) % getCycleDuration(bpm);
-  lapProgress = (lapProgress + (seconds * bpm) / 60 / BEATS_PER_LAP) % 1;
+  bloodDistance += ((seconds * bpm) / 60) * DISTANCE_PER_BEAT;
 }
 
 /**
@@ -246,6 +319,7 @@ function animate(now) {
 function setPlaying(value) {
   playing = value;
   playButton.textContent = playing ? "Pozastavit" : "Přehrát";
+  draw(); // přepne popis fáze (při přehrávání jen nápověda)
   if (playing) {
     lastFrameTime = null;
     requestAnimationFrame(animate);
@@ -266,7 +340,7 @@ function stepToNextPhase() {
   // O kolik sekund jsme se posunuli (přes konec úderu počítáme dál od nuly).
   let seconds = target - timeInCycle;
   if (seconds <= 0) seconds += getCycleDuration(bpm);
-  lapProgress = (lapProgress + (seconds * bpm) / 60 / BEATS_PER_LAP) % 1;
+  bloodDistance += ((seconds * bpm) / 60) * DISTANCE_PER_BEAT;
   timeInCycle = target;
 
   draw();
