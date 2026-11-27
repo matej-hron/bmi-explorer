@@ -85,8 +85,12 @@ Díky tomu jdou výpočty otestovat bez prohlížeče a každý soubor má jednu
 3. `getPhaseAt()` ze `srdce.js` řekne, ve které fázi srdce je a jak daleko v ní.
 4. Podle toho se dutina, která se právě stahuje, zmenší (víc uprostřed stahu, funkce sinus).
    Chlopně a šipky přepíná CSS podle atributu `data-phase` na obrázku.
-5. Tečky krve se posouvají po smyčkách oběhu (`getPointAtLength`). V polovině smyčky,
-   tedy v plicích nebo v těle, změní barvu.
+   Srdce je nakreslené jako v učebnici (sval, dutiny, aorta, duté žíly, plicní cévy).
+5. Oběh je nakreslený v postavě člověka. Každý okruh (plíce, hlava, ruce, nohy) má tepnu
+   a žílu; tečky krve jedou nejdřív po tepně, pak po žíle (`getPointAtLength`) a podle toho
+   mají barvu. Tlačítky nad obrázkem jde zvýraznit jen malý nebo jen velký oběh.
+   Popis fáze se ukáže jen při pozastavení nebo po tlačítku Krok – při přehrávání
+   by se střídal příliš rychle (a na telefonu by panel poskakoval).
 6. Když uživatel změní tep, `getCardiacOutput()`, `getBeatsPerDay()` a `getPhaseDurations()`
    přepočítají čísla a časovou osu.
 

@@ -61,96 +61,150 @@
 
         <div class="heart-explorer">
 
-          <!-- Srdce v řezu. Souřadnice: x od -60 do 400, y od 0 do 380.
+          <!-- Srdce v řezu (jako obrázek v učebnici). Souřadnice: šířka 440, výška 430.
                Pravá polovina srdce je na obrázku VLEVO (díváme se na člověka zepředu). -->
           <figure class="figure heart-figure">
-            <svg id="heart-svg" class="heart-svg" viewBox="-60 0 460 380" role="img"
+<svg id="heart-svg" class="heart-svg" viewBox="0 0 440 430" role="img"
                  aria-labelledby="heart-svg-title heart-svg-desc" data-phase="atria">
               <title id="heart-svg-title">Srdce v řezu</title>
-              <desc id="heart-svg-desc">Schéma srdce se dvěma síněmi nahoře a dvěma komorami dole.
-                Pravá polovina s odkysličenou krví je nakreslená modře, levá s okysličenou krví červeně.</desc>
+              <desc id="heart-svg-desc">Srdce v řezu jako v učebnici: nahoře dvě síně, dole dvě komory,
+                nad srdcem oblouk aorty a plicní tepna. Pravá polovina s odkysličenou krví je modře,
+                levá s okysličenou krví červeně. Levou a pravou polovinu odděluje svalová přepážka.</desc>
 
-              <!-- Hrot šipky, který se přidá na konec každé šipky toku krve -->
               <defs>
+                <!-- Hrot šipky, který se přidá na konec každé šipky toku krve -->
                 <marker id="arrowhead" viewBox="0 0 10 10" refX="6" refY="5"
                         markerWidth="3.5" markerHeight="3.5" orient="auto">
                   <path d="M0 0 L10 5 L0 10 z" fill="#fff"/>
                 </marker>
+                <!-- Lesk srdečního svalu: světlejší vlevo nahoře, tmavší vpravo dole -->
+                <radialGradient id="muscle-shine" cx="35%" cy="30%" r="80%">
+                  <stop offset="0" stop-color="#c4566a"/>
+                  <stop offset="0.6" stop-color="#9c3346"/>
+                  <stop offset="1" stop-color="#6e1f2d"/>
+                </radialGradient>
               </defs>
 
-              <!-- Cévy (trubky). Kreslíme je jako první, aby byly pod dutinami. -->
+              <!-- 1) Cévy ZA srdcem. Každá céva je čára nakreslená dvakrát:
+                      široká tmavá (stěna cévy) a užší barevná (krev uvnitř). -->
               <g class="vessels">
-                <!-- horní dutá žíla: z těla do pravé síně -->
-                <rect class="vessel vessel-blue" x="70" y="18" width="34" height="90" rx="6"/>
-                <!-- dolní dutá žíla: z těla do pravé síně (zleva) -->
-                <rect class="vessel vessel-blue" x="-24" y="140" width="72" height="30" rx="6"/>
-                <!-- plicní tepna: z pravé komory do plic -->
-                <rect class="vessel vessel-blue" x="156" y="30" width="34" height="175" rx="6"/>
-                <!-- aorta: z levé komory do těla -->
-                <rect class="vessel vessel-red" x="210" y="30" width="34" height="175" rx="6"/>
-                <!-- plicní žíly: z plic do levé síně -->
-                <rect class="vessel vessel-red" x="296" y="18" width="34" height="90" rx="6"/>
+                <!-- plicní tepna: z pravé komory nahoru a rozdělí se do obou plic.
+                     Pravá větev vede za aortou i za dutou žílou. -->
+                <path class="vessel-wall" d="M177 130 V108 M177 108 C 150 100, 90 96, 22 102 M177 108 C 210 100, 300 104, 345 118 C 370 125, 395 122, 420 112"/>
+                <path class="vessel-blood vessel-blue" d="M177 130 V108 M177 108 C 150 100, 90 96, 22 102 M177 108 C 210 100, 300 104, 345 118 C 370 125, 395 122, 420 112"/>
+                <!-- aorta: z levé komory nahoru, oblouk doprava a dolů za srdce -->
+                <path class="vessel-wall" d="M240 140 V95 C 240 30, 345 25, 352 85 V180"/>
+                <path class="vessel-blood vessel-red" d="M240 140 V95 C 240 30, 345 25, 352 85 V180"/>
+                <!-- tři tepny z oblouku aorty do hlavy a rukou -->
+                <path class="vessel-wall branch" d="M262 50 L250 8 M292 40 V4 M320 48 L333 8"/>
+                <path class="vessel-blood vessel-red branch" d="M262 50 L250 8 M292 40 V4 M320 48 L333 8"/>
+                <!-- horní dutá žíla: z hlavy a rukou shora do pravé síně -->
+                <path class="vessel-wall" d="M112 8 V150"/>
+                <path class="vessel-blood vessel-blue" d="M112 8 V150"/>
               </g>
 
-              <!-- Čtyři dutiny. srdce-page.js je zmenšuje, když se stahují. -->
+              <!-- 2) Srdeční sval (obrys celého srdce). Hrot srdce míří dolů a doprava. -->
+              <path class="heart-muscle" d="M88 138
+                C 70 140, 55 165, 58 195
+                C 60 225, 70 250, 78 275
+                C 100 335, 190 390, 300 412
+                C 322 416, 338 400, 350 370
+                C 372 315, 380 260, 372 215
+                C 366 180, 362 150, 350 132
+                C 335 118, 300 120, 280 128
+                L 200 132
+                C 170 128, 120 128, 88 138 Z"/>
+
+              <!-- 3) Cévy PŘED srdečním svalem: tady vidíme, kde cévy ústí do dutin.
+                      Konce cév schová dutina, která se kreslí až po nich. -->
+              <g class="vessels">
+                <!-- horní dutá žíla: z hlavy a rukou shora do pravé síně -->
+                <path class="vessel-wall" d="M112 120 V165"/>
+                <path class="vessel-blood vessel-blue" d="M112 120 V165"/>
+                <!-- dolní dutá žíla: z dolní části těla zdola do pravé síně -->
+                <path class="vessel-wall" d="M100 205 C 72 230, 56 265, 50 310 V425"/>
+                <path class="vessel-blood vessel-blue" d="M100 205 C 72 230, 56 265, 50 310 V425"/>
+                <!-- plicní žíly: z plic zprava do levé síně (dvě nahoře, dvě dole) -->
+                <path class="vessel-wall vein-small" d="M325 158 C 370 150, 395 140, 440 140 M325 184 C 370 184, 395 192, 440 194"/>
+                <path class="vessel-blood vessel-red vein-small" d="M325 158 C 370 150, 395 140, 440 140 M325 184 C 370 184, 395 192, 440 194"/>
+                <!-- začátek plicní tepny a aorty: vychází z komor přes horní část srdce -->
+                <path class="vessel-wall" d="M177 232 V126"/>
+                <path class="vessel-blood vessel-blue" d="M177 232 V126"/>
+                <path class="vessel-wall" d="M240 226 V136"/>
+                <path class="vessel-blood vessel-red" d="M240 226 V136"/>
+              </g>
+
+              <!-- 4) Čtyři dutiny. srdce-page.js je zmenšuje, když se stahují. -->
               <g id="chamber-ra" class="chamber">
-                <rect class="blood-blue" x="40" y="100" width="110" height="80" rx="18"/>
-                <text class="chamber-label" x="95" y="145">pravá síň</text>
+                <path class="blood-blue" d="M95 150 C 120 140, 150 148, 158 165
+                  C 165 185, 158 212, 145 222 L 100 224 C 82 214, 76 190, 80 170
+                  C 82 160, 87 154, 95 150 Z"/>
+                <text class="chamber-label" x="120" y="190">pravá síň</text>
               </g>
               <g id="chamber-la" class="chamber">
-                <rect class="blood-red" x="250" y="100" width="110" height="80" rx="18"/>
-                <text class="chamber-label" x="305" y="145">levá síň</text>
+                <path class="blood-red" d="M272 142 C 300 132, 330 138, 340 155
+                  C 348 172, 342 192, 330 202 L 278 204 C 266 196, 262 178, 263 162
+                  C 264 152, 266 146, 272 142 Z"/>
+                <text class="chamber-label" x="303" y="176">levá síň</text>
               </g>
               <g id="chamber-rv" class="chamber">
-                <rect class="blood-blue" x="40" y="196" width="150" height="140" rx="26"/>
-                <text class="chamber-label" x="115" y="275">pravá komora</text>
+                <path class="blood-blue" d="M96 240 L 150 240 L 165 236 L 192 236
+                  C 200 260, 205 290, 208 320 C 210 340, 222 360, 232 372
+                  C 200 362, 150 335, 118 305 C 100 288, 92 262, 96 240 Z"/>
+                <text class="chamber-label" x="150" y="290">pravá</text>
+                <text class="chamber-label" x="152" y="307">komora</text>
               </g>
               <g id="chamber-lv" class="chamber">
-                <!-- levá komora má silnější stěnu (tlustší obrys) -->
-                <rect class="blood-red wall-thick" x="214" y="196" width="146" height="140" rx="26"/>
-                <text class="chamber-label" x="287" y="275">levá komora</text>
+                <path class="blood-red" d="M226 232 L 256 230 L 270 220 L 330 220
+                  C 342 250, 345 290, 336 330 C 328 362, 315 378, 300 380
+                  C 282 378, 262 360, 250 330 C 238 300, 232 262, 226 232 Z"/>
+                <text class="chamber-label" x="292" y="290">levá</text>
+                <text class="chamber-label" x="292" y="307">komora</text>
               </g>
 
-              <!-- Chlopně. Každý cíp se otáčí kolem svého pantu (transform-origin).
+              <!-- 5) Chlopně. Každý cíp se otáčí kolem svého pantu (transform-origin).
                    --open = o kolik stupňů se cíp otočí, když je chlopeň otevřená. -->
               <!-- Cípaté chlopně (mezi síní a komorou): otevírají se dolů do komory -->
               <g class="valve valve-av" aria-hidden="true">
-                <line class="leaflet" x1="62" y1="188" x2="95" y2="188" style="--open: 70deg; transform-origin: 62px 188px"/>
-                <line class="leaflet" x1="128" y1="188" x2="95" y2="188" style="--open: -70deg; transform-origin: 128px 188px"/>
-                <line class="leaflet" x1="272" y1="188" x2="305" y2="188" style="--open: 70deg; transform-origin: 272px 188px"/>
-                <line class="leaflet" x1="338" y1="188" x2="305" y2="188" style="--open: -70deg; transform-origin: 338px 188px"/>
+                <line class="leaflet" x1="98" y1="232" x2="122" y2="232" style="--open: 65deg; transform-origin: 98px 232px"/>
+                <line class="leaflet" x1="146" y1="232" x2="122" y2="232" style="--open: -65deg; transform-origin: 146px 232px"/>
+                <line class="leaflet" x1="276" y1="212" x2="302" y2="212" style="--open: 65deg; transform-origin: 276px 212px"/>
+                <line class="leaflet" x1="328" y1="212" x2="302" y2="212" style="--open: -65deg; transform-origin: 328px 212px"/>
               </g>
               <!-- Poloměsíčité chlopně (na začátku plicní tepny a aorty): otevírají se nahoru -->
               <g class="valve valve-semilunar" aria-hidden="true">
-                <line class="leaflet" x1="158" y1="200" x2="173" y2="200" style="--open: -70deg; transform-origin: 158px 200px"/>
-                <line class="leaflet" x1="188" y1="200" x2="173" y2="200" style="--open: 70deg; transform-origin: 188px 200px"/>
-                <line class="leaflet" x1="212" y1="200" x2="227" y2="200" style="--open: -70deg; transform-origin: 212px 200px"/>
-                <line class="leaflet" x1="242" y1="200" x2="227" y2="200" style="--open: 70deg; transform-origin: 242px 200px"/>
+                <line class="leaflet" x1="164" y1="230" x2="177" y2="230" style="--open: -70deg; transform-origin: 164px 230px"/>
+                <line class="leaflet" x1="190" y1="230" x2="177" y2="230" style="--open: 70deg; transform-origin: 190px 230px"/>
+                <line class="leaflet" x1="227" y1="226" x2="240" y2="226" style="--open: -70deg; transform-origin: 227px 226px"/>
+                <line class="leaflet" x1="253" y1="226" x2="240" y2="226" style="--open: 70deg; transform-origin: 253px 226px"/>
               </g>
 
-              <!-- Šipky ukazují, kudy teče krev v aktuální fázi -->
+              <!-- 6) Šipky ukazují, kudy teče krev v aktuální fázi -->
               <g class="flow flow-veins" aria-hidden="true">
-                <path class="arrow" d="M87 40 V90"/>
-                <path class="arrow" d="M-16 155 H40"/>
-                <path class="arrow" d="M313 40 V90"/>
+                <path class="arrow" d="M112 30 V150"/>
+                <path class="arrow" d="M50 410 V315 C 55 270, 70 240, 94 214"/>
+                <path class="arrow" d="M434 140 C 395 140, 372 150, 330 158"/>
+                <path class="arrow" d="M434 194 C 395 192, 372 184, 332 184"/>
               </g>
               <g class="flow flow-av" aria-hidden="true">
-                <path class="arrow" d="M95 160 V225"/>
-                <path class="arrow" d="M305 160 V225"/>
+                <path class="arrow" d="M120 205 C 122 240, 132 260, 150 275"/>
+                <path class="arrow" d="M300 190 C 300 225, 296 250, 292 270"/>
               </g>
               <g class="flow flow-out" aria-hidden="true">
-                <path class="arrow" d="M173 250 V50"/>
-                <path class="arrow" d="M227 250 V50"/>
+                <path class="arrow" d="M195 320 C 185 280, 177 260, 177 220 V112 C 150 104, 90 100, 40 104"/>
+                <path class="arrow" d="M262 330 C 250 290, 240 260, 240 220 V95 C 240 45, 345 35, 352 85 V118"/>
               </g>
 
-              <!-- Popisky cév -->
-              <text class="vessel-label" x="87" y="12">horní dutá žíla</text>
-              <text class="vessel-label anchor-start" x="-58" y="120">dolní dutá</text>
-              <text class="vessel-label anchor-start" x="-58" y="133">žíla</text>
-              <text class="vessel-label anchor-end" x="192" y="24">plicní tepna</text>
-              <text class="vessel-label anchor-start" x="208" y="24">aorta</text>
-              <text class="vessel-label" x="313" y="12">plicní žíly</text>
-              <text class="vessel-label" x="200" y="372">přepážka odděluje pravou a levou polovinu</text>
+              <!-- 7) Popisky cév -->
+              <text class="vessel-label anchor-start" x="130" y="22">horní dutá žíla</text>
+              <text class="vessel-label anchor-start" x="72" y="412">dolní dutá žíla</text>
+              <text class="vessel-label anchor-start" x="2" y="132">plicní tepna</text>
+              <text class="vessel-label anchor-start" x="2" y="146">(do plic)</text>
+              <text class="vessel-label anchor-start" x="374" y="36">aorta</text>
+              <text class="vessel-label anchor-end" x="438" y="224">plicní žíly</text>
+              <text class="vessel-label anchor-end" x="438" y="238">(z plic)</text>
+              <text class="vessel-label" x="245" y="412">přepážka</text>
+              <path class="label-line" d="M235 400 L 218 352"/>
             </svg>
             <figcaption>
               Díváme se na člověka zepředu, proto je jeho <strong>pravá</strong> polovina srdce
@@ -158,54 +212,93 @@
             </figcaption>
           </figure>
 
-          <!-- Malý a velký krevní oběh. Souřadnice: šířka 300, výška 400. -->
+          <!-- Malý a velký krevní oběh v postavě člověka. Souřadnice: šířka 300, výška 470. -->
           <figure class="figure heart-figure">
-            <svg id="circulation-svg" class="circulation-svg" viewBox="0 0 300 400" role="img"
-                 aria-labelledby="circ-svg-title circ-svg-desc">
-              <title id="circ-svg-title">Malý a velký krevní oběh</title>
-              <desc id="circ-svg-desc">Krev z pravé poloviny srdce teče do plic, kde nabere kyslík,
-                a vrací se do levé poloviny. Odtud teče do celého těla, kde kyslík odevzdá,
-                a vrací se do pravé poloviny srdce.</desc>
+<!-- Tlačítka: který oběh zvýraznit -->
+            <div id="circuit-toggle" class="circuit-toggle" role="group" aria-label="Který oběh zvýraznit">
+              <button type="button" class="button preset" data-show="all" aria-pressed="true">Oba oběhy</button>
+              <button type="button" class="button preset" data-show="small" aria-pressed="false">Malý (plicní)</button>
+              <button type="button" class="button preset" data-show="large" aria-pressed="false">Velký (tělní)</button>
+            </div>
+            <svg id="circulation-svg" class="circulation-svg" viewBox="0 0 300 470" role="img"
+                 aria-labelledby="circ-svg-title circ-svg-desc" data-show="all">
+              <title id="circ-svg-title">Malý a velký krevní oběh v těle člověka</title>
+              <desc id="circ-svg-desc">Postava člověka se srdcem v hrudi. Malý oběh vede ze srdce
+                do plic, kde krev nabere kyslík, a zpátky do srdce. Velký oběh vede ze srdce
+                do hlavy, rukou a nohou, kde krev kyslík odevzdá, a zpátky do srdce.</desc>
 
-              <!-- Plíce a tělo -->
-              <rect class="organ organ-lungs" x="70" y="20" width="160" height="60" rx="16"/>
-              <text class="organ-label" x="150" y="40">plíce</text>
-              <rect class="organ organ-body" x="60" y="318" width="180" height="64" rx="16"/>
-              <text class="organ-label" x="150" y="374">tělo (svaly, mozek, orgány)</text>
-
-              <!-- Cévy: první polovina smyčky jednou barvou, druhá druhou -->
-              <path class="loop loop-blue" d="M120 160 V50 H150"/>
-              <path class="loop loop-red" d="M150 50 H180 V160"/>
-              <path class="loop loop-red" d="M180 240 V350 H150"/>
-              <path class="loop loop-blue" d="M150 350 H120 V240"/>
-
-              <!-- Celé smyčky pro pohyb teček (neviditelné) -->
-              <path id="loop-small" class="loop-track" d="M120 160 V50 H180 V160"/>
-              <path id="loop-large" class="loop-track" d="M180 240 V350 H120 V240"/>
-
-              <!-- Srdce: levá půlka obrázku = pravá polovina srdce -->
-              <g id="circ-heart">
-                <rect class="blood-blue" x="90" y="160" width="58" height="80" rx="12"/>
-                <rect class="blood-red" x="152" y="160" width="58" height="80" rx="12"/>
-                <text class="organ-label organ-label-light" x="119" y="196">pravá</text>
-                <text class="organ-label organ-label-light" x="119" y="212">půlka</text>
-                <text class="organ-label organ-label-light" x="181" y="196">levá</text>
-                <text class="organ-label organ-label-light" x="181" y="212">půlka</text>
+              <!-- Postava (díváme se na člověka zepředu) -->
+              <g class="body-shape">
+                <ellipse cx="150" cy="42" rx="28" ry="34"/>
+                <path d="M138 70 V96 C 118 98, 96 102, 84 110 C 72 118, 68 135, 66 160
+                  L 46 278 C 43 294, 64 298, 67 284 L 86 178 L 92 172 L 94 285 L 102 452
+                  C 102 466, 142 466, 142 452 L 146 308 C 147 302, 153 302, 154 308 L 158 452
+                  C 158 466, 198 466, 198 452 L 206 285 L 208 172 L 214 178 L 233 284
+                  C 236 298, 257 294, 254 278 L 234 160 C 232 135, 228 118, 216 110
+                  C 204 102, 182 98, 162 96 V70 Z"/>
               </g>
 
-              <!-- Tečky krve sem doplní srdce-page.js -->
-              <g id="blood-dots" aria-hidden="true"></g>
+              <!-- Plíce -->
+              <path class="organ organ-lungs" d="M140 120 C 120 112, 102 125, 100 150
+                C 98 175, 100 200, 112 206 C 126 210, 140 200, 142 185 Z"/>
+              <path class="organ organ-lungs" d="M164 120 C 184 112, 204 125, 206 150
+                C 208 175, 206 200, 194 206 C 186 208, 182 200, 180 192 L 164 180 Z"/>
 
-              <!-- Názvy oběhů -->
-              <text class="loop-label anchor-start" x="240" y="115">malý</text>
-              <text class="loop-label anchor-start" x="240" y="130">(plicní)</text>
-              <text class="loop-label anchor-start" x="240" y="145">oběh</text>
-              <text class="loop-label anchor-start" x="240" y="275">velký</text>
-              <text class="loop-label anchor-start" x="240" y="290">(tělní)</text>
-              <text class="loop-label anchor-start" x="240" y="305">oběh</text>
+              <!-- Cévy. Každý okruh (g.circuit) má dvě části:
+                     data-part="out"  = tepna, krev teče ZE srdce,
+                     data-part="back" = žíla, krev teče DO srdce.
+                   Barva ukazuje, jestli je krev okysličená (červená) nebo ne (modrá).
+                   Tečky krve sem doplní srdce-page.js. -->
+
+              <!-- Malý (plicní) oběh: srdce → plíce → srdce -->
+              <g class="circuit circuit-small">
+                <path class="loop loop-blue" data-part="out" d="M150 172 C 135 160, 120 148, 110 136"/>
+                <path class="loop loop-red" data-part="back" d="M108 180 C 125 194, 150 192, 168 178"/>
+              </g>
+              <g class="circuit circuit-small">
+                <path class="loop loop-blue" data-part="out" d="M152 164 C 162 140, 184 128, 198 138"/>
+                <path class="loop loop-red" data-part="back" d="M198 176 C 188 184, 178 180, 170 172"/>
+              </g>
+
+              <!-- Velký (tělní) oběh: srdce → hlava / ruce / nohy → srdce -->
+              <g class="circuit circuit-large">
+                <path class="loop loop-red" data-part="out" d="M168 162 C 168 130, 157 110, 157 40"/>
+                <path class="loop loop-blue" data-part="back" d="M143 40 C 143 110, 146 140, 150 166"/>
+              </g>
+              <g class="circuit circuit-large">
+                <path class="loop loop-red" data-part="out" d="M166 160 C 150 120, 110 106, 92 120 C 82 130, 80 160, 76 200 L 62 278"/>
+                <path class="loop loop-blue" data-part="back" d="M52 276 L 66 198 C 70 160, 72 124, 88 112 C 110 96, 140 120, 150 168"/>
+              </g>
+              <g class="circuit circuit-large">
+                <path class="loop loop-red" data-part="out" d="M170 160 C 180 125, 200 106, 212 118 C 222 130, 222 160, 226 200 L 240 278"/>
+                <path class="loop loop-blue" data-part="back" d="M250 276 L 236 198 C 232 160, 230 122, 216 110 C 196 96, 162 120, 152 168"/>
+              </g>
+              <g class="circuit circuit-large">
+                <path class="loop loop-red" data-part="out" d="M166 184 C 162 230, 152 262, 136 292 L 128 450"/>
+                <path class="loop loop-blue" data-part="back" d="M116 450 L 124 290 C 136 262, 148 230, 152 184"/>
+              </g>
+              <g class="circuit circuit-large">
+                <path class="loop loop-red" data-part="out" d="M168 184 C 170 230, 170 262, 168 292 L 172 450"/>
+                <path class="loop loop-blue" data-part="back" d="M184 450 L 180 290 C 178 262, 164 230, 156 186"/>
+              </g>
+
+              <!-- Srdce: levá půlka obrázku = pravá polovina srdce (modrá) -->
+              <g id="circ-heart">
+                <path class="blood-blue heart-half" d="M160 164 C 160 152, 140 150, 138 164 C 136 176, 150 188, 160 198 Z"/>
+                <path class="blood-red heart-half" d="M160 164 C 160 152, 180 150, 182 164 C 184 176, 170 188, 160 198 Z"/>
+              </g>
+
+              <!-- Popisky -->
+              <text class="organ-label anchor-start" x="184" y="26">hlava</text>
+              <text class="organ-label anchor-start" x="2" y="246">plíce</text>
+              <path class="label-line" d="M20 234 L 104 184"/>
+              <text class="organ-label anchor-end" x="298" y="246">srdce</text>
+              <path class="label-line" d="M280 234 L 182 180"/>
+              <text class="organ-label anchor-start" x="244" y="304">ruka</text>
+              <text class="organ-label anchor-start" x="200" y="420">noha</text>
             </svg>
             <figcaption>
-              Krev v plicích nabere kyslík (zčervená) a v těle ho odevzdá (zmodrá).
+              Krev v plicích nabere kyslík (zčervená) a v hlavě, rukou a nohou ho odevzdá (zmodrá).
               Rychlost teček není skutečná, jen ukazuje, že rychlejší tep = rychlejší oběh.
             </figcaption>
           </figure>
